@@ -1,9 +1,70 @@
 # Z2-Re:Connect
 
+**Use the Native Instruments Traktor Kontrol Z2 on iPad and iPhone without drivers: audio and USB-MIDI.**
+For example with djay Pro (4 decks, DVS), with four pad layers per deck, cue colours on the pads and level meters.
+
+*[Deutsche Version weiter unten](#deutsch)*
+
+![Controls in djay](grafik/z2_djay_mapping_en.png)
+
+> **Private hobby project with no commercial background. Not a product of Native Instruments or Algoriddim.
+> Use at your own risk, without any warranty.** Current version: **0.9.0 Beta 2**, a public test run.
+
+## Why this project?
+I'm not a programmer or an IT specialist. I've been a DJ for many years and always loved my DJ gear, and it made me sad
+that some devices simply can't be used anymore at some point. It's a real shame to watch good equipment gather dust until
+it ends up in the bin.
+
+That's how the idea for the **Re:Connect project** came about: breathing new life into old DJ and music hardware.
+The Traktor Kontrol Z2 is the first device.
+
+## Download and install
+The ready-to-use programs are under **[Releases](../../releases)** (on the right side of this page):
+
+| File | What for |
+|---|---|
+| `Z2-ReConnect-0.9.0-beta2-Windows.zip` | Installer for Windows |
+| `Z2-ReConnect-0.9.0-beta2-Mac.zip` | Installer for macOS (Apple Silicon and Intel) |
+| `Z2-ReConnect-djay-Mapping-v8.zip` | Matching mapping for djay Pro on iPad |
+
+**Requirements:** Z2 with firmware 42 (the last NI version) or an older Z2-Re:Connect version, Z2 connected to its power
+supply and plugged directly into the computer via USB (no hub). On Windows, the NI driver for the Z2 must be installed.
+
+The installer first reads the firmware from your Z2, **always makes a backup** and only writes if the firmware matches
+the expected version exactly. With the backup you can go back to the original firmware at any time.
+Start it with `--lang en` or pick English on the first page. The full guide (German) is in
+[`installer/LIESMICH.md`](installer/LIESMICH.md).
+
+## What's inside?
+| Folder | Contents |
+|---|---|
+| `installer/` | Installer (Python, window and text version), patch files, build scripts |
+| `firmware/` | Source code of the new firmware parts (USB-MIDI, buttons → MIDI, MIDI → LEDs) and the patch description |
+| `djay/` | djay mapping and the script that generates it |
+| `grafik/` | Control overview images (German and English) |
+
+The MIDI assignment is described in [`firmware/README.md`](firmware/README.md) (German).
+
+## Legal: no NI firmware in this repository
+This repository contains **no firmware from Native Instruments**. The patch files (`*.z2patch`, each under 3 KB) only
+contain copy instructions and the newly written bytes. The original firmware always comes from your own device.
+Backups (`*.z2backup`) contain the original firmware and must **not** be shared.
+"Native Instruments", "Traktor" and "Kontrol" are trademarks of Native Instruments, "djay" of Algoriddim.
+
+## Feedback
+Please report bugs, questions and test reports as an **[issue](../../issues)**. Helpful details: operating system,
+iPad/iPhone model, app, and what exactly happened.
+
+## License
+Own code and own documents: [MIT](LICENSE).
+
+---
+
+<a id="deutsch"></a>
+# Z2-Re:Connect (Deutsch)
+
 **Den Native Instruments Traktor Kontrol Z2 ohne Treiber am iPad und iPhone nutzen: Audio und USB-MIDI.**
 Zum Beispiel mit djay Pro (4 Decks, DVS), mit vier Pad-Ebenen pro Deck, Cue-Farben auf den Pads und Pegelanzeigen.
-
-*English summary below.*
 
 ![Belegung in djay](grafik/z2_djay_mapping.png)
 
@@ -39,7 +100,6 @@ Die ganze Anleitung steht in [`installer/LIESMICH.md`](installer/LIESMICH.md).
 |---|---|
 | `installer/` | Installer (Python, Fenster- und Textversion), Patch-Dateien, Build-Skripte |
 | `firmware/` | Quelltext der neuen Firmware-Teile (USB-MIDI, Tasten → MIDI, MIDI → LEDs) und die Patch-Beschreibung |
-| `tools/` | Werkzeuge für Entwickler: DFU-Flashen, Auslesen, HID- und MIDI-Tests, LED-Kalibrierung |
 | `djay/` | djay-Mapping und das Skript, das es erzeugt |
 | `grafik/` | Belegungsbilder (deutsch und englisch) |
 
@@ -57,19 +117,3 @@ App, und was genau passiert ist.
 
 ## Lizenz
 Eigener Code und eigene Dokumente: [MIT](LICENSE).
-
----
-
-## English summary
-Z2-Re:Connect is a firmware patch that makes the Native Instruments Traktor Kontrol Z2 work class-compliant on iPad and
-iPhone, with audio **and** USB-MIDI (e.g. djay Pro with 4 decks, DVS, pad layers, cue colours, level meters).
-Download the installer for Windows or macOS from **[Releases](../../releases)**; start it with `--lang en` or pick English
-on the first page. It always backs up your current firmware first and only writes if your Z2 runs exactly NI firmware 42
-(or an older Z2-Re:Connect build). No Native Instruments firmware is included in this repository. Hobby project, not
-affiliated with Native Instruments or Algoriddim, no warranty, use at your own risk.
-
-### Why this project?
-I'm not a programmer or an IT specialist. I've been a DJ for a long time and always loved my DJ gear, and it made me sad
-that some of it simply can't be used anymore. It's a real shame to watch good equipment gather dust until it ends up in
-the bin. That's how the idea for the **Re:Connect project** came about: breathing new life into old DJ and music hardware.
-The Traktor Kontrol Z2 is the first device.

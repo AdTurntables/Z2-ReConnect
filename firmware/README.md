@@ -44,7 +44,7 @@ Audio, der eingebaute Mixer und HID für Traktor am Computer bleiben unveränder
 - Note mit gleicher Nummer wie die Taste (Kanal 1) → LED dieser Taste. Die Velocity 0–127 bestimmt die Helligkeit, Note Off = aus.
 - **Pads (ab Stand 4):** Pad-Note auf Kanal 1, 4, 5 oder 6 → Helligkeit des Pads in Ebene 1–4. Die Firmware merkt sich jede Ebene und zeigt die aktive in ihrer Farbe: 1 blau, 2 lila, 3 gelb, 4 weiß. LED-Noten für DECK A–D von der App werden ignoriert.
 - **Cue-Farben (ab Stand 5):** Velocity 1–16 = Farbe voll, 17–32 = dieselbe Farbe gedimmt, in jeder Ebene: 1 rot, 2 rotorange, 3 orange, 4 bernstein, 5 gelb, 6 limette, 7 grün, 8 frühlingsgrün, 9 cyan, 10 himmelblau, 11 blau, 12 indigo, 13 violett, 14 magenta, 15 pink, 16 weiß. Andere Werte wie bisher (Helligkeit in der Ebenenfarbe). Das djay-Mapping ab Version 8 schickt diese Werte über `userInfo` (`padColorsActive`/`padColorsDimmed`).
-- Am Gerät gemessen (20.11.2026, `tools/build/led_calibration.json`): Jede Tasten-Note trifft ihre eigene LED. Rel/Intl A/B haben zwei Farben (0x12/0x13 bzw. 0x1A/0x1B); die Note schaltet die grüne (0x13/0x1B). Deck C/D haben eine zweite LED (0x0B/0x0C).
+- Am Gerät gemessen (20.11.2026): Jede Tasten-Note trifft ihre eigene LED. Rel/Intl A/B haben zwei Farben (0x12/0x13 bzw. 0x1A/0x1B); die Note schaltet die grüne (0x13/0x1B). Deck C/D haben eine zweite LED (0x0B/0x0C).
 - Weitere LEDs ohne Taste: 0x80/0x01 kleines Dreieck oben, 0x80/0x02 Schallplattensymbol (orange), 0x81/0x01, 0x09, 0x11, 0x19 = Buchstaben A, B, C, D der Pegelanzeige, 0x81/0x21 MST, 0x81/0x27 USB-Symbol.
 - **Kanal 2, CC n (1–94)** → LED n des Berichts 0x80, roh. Dazu gehören die Pad-RGB-Kanäle 0x1D–0x34 und die 7-Segment-Anzeigen 0x35–0x5E (Reihenfolge der Segmente g, c, b, a, f, e, d).
 - **Kanal 3, CC 65–68 (ab Stand 5b)** → Pegelanzeige A, B, C, D als Balken: Wert 0–7 = Anzahl leuchtender LEDs (C/D zeigen bei Master-Hoheit der Hardware weiter den Master).
@@ -57,8 +57,8 @@ Audio, der eingebaute Mixer und HID für Traktor am Computer bleiben unveränder
 - Kern-Code: `z2midi/` (C99). Host-Tests: `gcc -std=c99 -Wall -Wextra -Werror z2midi.c test_z2midi.c`.
 - Baustein bauen + XS1-Simulator-Test: `stage2/build_blob.sh` (WSL). Ab Stand 4 ohne C-Startcode (`-nostartfiles`, Einstieg `_start` in hooks.S), sonst passt er nicht in den ECM-Puffer (Stand 5b: 4060 von 4060 Bytes belegt – für Neues muss erst Platz geschaffen werden). Stand-3b-Baustein: `stage2/blob_stage3b.elf`.
 - Firmware-Modul: `stage2/` (`midi_glue.c`, `gen_hooks.py` → `hooks.S`). XS1-Simulator-Test: `stage2/sim_test.c`.
-- Patch: `tools/patch_stage2.py` (enthält Stage 1). Abbild: `build/build_image.sh ../../tools/build/ni_t0.bin <tile1> <out> 2` (WSL, xTIMEcomposer 14.4.1; mit `ni_t0.bin` und Version 2 entsteht Stand 4 bitgleich).
-- Flashen: `tools/z2_dfu_flash.py write <abbild> --yes`, danach `reboot --yes`. Prüfen mit `z2_dfu_readback.py clear` + `upload`.
-- **Zurück zur Original-Firmware 42:** `tools/backup/z2_upload_idle.bin` auf die gleiche Weise flashen.
+- Patch, Abbild bauen und Flashen: Die Entwickler-Werkzeuge dafür (`tools/`) sind bewusst **nicht** Teil dieses Repos,
+  weil sie ohne die Sicherheitsprüfungen des Installers auf den Z2 schreiben.
+- **Installieren und zurück zur Original-Firmware 42:** nur mit dem Installer (`installer/`), der immer ein Backup anlegt.
 
 Details zu Adressen, Analyse und Sicherheit stehen in `PATCH_PLAN.md`.
