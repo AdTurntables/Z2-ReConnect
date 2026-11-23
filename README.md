@@ -11,6 +11,8 @@ For example with djay Pro (4 decks, DVS), with four pad layers per deck, cue col
 
 *[Deutsche Version weiter unten](#deutsch)*
 
+![Four layers per pad row](grafik/z2_ebenen_en.png)
+
 ![Controls in djay](grafik/z2_djay_mapping_en.png)
 
 > **Private hobby project with no commercial background. Not a product of Native Instruments or Algoriddim.
@@ -71,6 +73,8 @@ Own code and own documents: [MIT](LICENSE).
 
 **Den Native Instruments Traktor Kontrol Z2 ohne Treiber am iPad und iPhone nutzen: Audio und USB-MIDI.**
 Zum Beispiel mit djay Pro (4 Decks, DVS), mit vier Pad-Ebenen pro Deck, Cue-Farben auf den Pads und Pegelanzeigen.
+
+![Vier Ebenen pro Pad-Reihe](grafik/z2_ebenen.png)
 
 ![Belegung in djay](grafik/z2_djay_mapping.png)
 
