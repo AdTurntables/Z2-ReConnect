@@ -1,0 +1,25 @@
+# Baut den Installer fuer Windows und macOS (GitHub Actions). Ergebnis: Artefakte zum Herunterladen.
+# Startet nur von Hand: Reiter "Actions" -> "build" -> "Run workflow".
+name: build
+on: [workflow_dispatch]
+jobs:
+  windows:
+    runs-on: windows-latest
+    defaults: { run: { working-directory: installer } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: ./build_windows.ps1
+      - uses: actions/upload-artifact@v4
+        with: { name: Z2-ReConnect-Installer-Windows, path: installer/dist_win/ }
+  macos:
+    runs-on: macos-latest
+    defaults: { run: { working-directory: installer } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: sh build_mac.sh
+      - uses: actions/upload-artifact@v4
+        with: { name: Z2-ReConnect-Installer-macOS, path: installer/dist/ }

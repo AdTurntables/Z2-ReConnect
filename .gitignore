@@ -1,0 +1,17 @@
+# Firmware von Native Instruments und alles, was direkt daraus entsteht, gehoert NICHT ins Repo.
+*.bin
+*.elf
+*.dis
+*.z2backup
+*.z2backup.txt
+*.zip
+*.exe
+*.sys
+*.inf
+dist/
+dist_win/
+dist_mac/
+release/
+mac_vendor/
+__pycache__/
+*.pyc

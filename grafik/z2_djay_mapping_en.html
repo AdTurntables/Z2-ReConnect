@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Z2 djay Mapping</title>
+<style>
+:root{--bg:#0c0e12;--panel:#151922;--line:#262c38;--text:#eef1f6;--mute:#9aa3b2;--acc:#ff7a1a;--cyan:#35c8ff;
+--l1:#3a7bff;--l2:#b04dff;--l3:#ffd23a;--l4:#f4f4f4}
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:1080px;height:1350px;background:var(--bg);color:var(--text);font-family:"Segoe UI",system-ui,sans-serif;overflow:hidden;position:relative}
+body:before{content:"";position:absolute;inset:0;background:radial-gradient(900px 600px at 90% -10%,rgba(53,200,255,.16),transparent 60%),radial-gradient(800px 600px at -10% 110%,rgba(255,122,26,.14),transparent 60%)}
+.wrap{position:relative;padding:52px 56px 0}
+.kicker{font-family:Bahnschrift,"Segoe UI";letter-spacing:.32em;font-size:20px;color:var(--cyan);font-weight:600}
+h1{font-family:Bahnschrift,"Segoe UI";font-weight:700;font-size:64px;line-height:1;margin-top:10px}
+h1 span{color:var(--cyan)}
+.chips{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.chips span{font-size:18px;padding:5px 13px;border-radius:999px;background:#1a1f2a;border:1px solid var(--line);color:var(--mute)}
+.chips span b{color:var(--text);font-weight:600}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px}
+.col{display:flex;flex-direction:column;gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px 20px 12px}
+.card h3{font-family:Bahnschrift,"Segoe UI";font-size:22px;letter-spacing:.14em;font-weight:600;color:var(--acc);margin-bottom:6px}
+.card.c h3{color:var(--cyan)}
+.r{display:grid;grid-template-columns:172px 1fr;gap:10px;align-items:baseline;padding:5px 0;border-top:1px solid #1e2430;font-size:18.5px;line-height:1.3}
+.r:first-of-type{border-top:0}
+.r .k{font-family:Bahnschrift,"Segoe UI";font-weight:600;font-size:17.5px;color:var(--text);letter-spacing:.02em}
+.r .v{color:#c9d0db}
+.r .s{display:block;color:var(--acc);font-size:15px;margin-top:1px}
+.r .s:before{content:"SHIFT  ";font-family:Bahnschrift;letter-spacing:.08em;font-size:13px;opacity:.85}
+.pads{grid-column:1/3}
+.lay{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:6px}
+.ly{border-radius:14px;padding:12px 14px;background:#0f1218;border:1px solid var(--line);position:relative;overflow:hidden}
+.ly:before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--c)}
+.ly .n{font-family:Bahnschrift;font-size:15px;color:var(--mute);letter-spacing:.12em}
+.ly .t{font-size:19px;font-weight:600;margin-top:2px}
+.ly .d{font-size:15px;color:var(--mute);margin-top:3px;line-height:1.3}
+.btns{display:flex;gap:6px;margin-top:7px}
+.btns u{text-decoration:none;font-family:Bahnschrift;font-size:13px;padding:2px 8px;border-radius:5px;border:1px solid #3a4150;color:#6b7383}
+.btns u.on{color:#111;background:#ffb15e;border-color:#ffb15e}
+.dvs{grid-column:1/3;display:flex;gap:18px;align-items:center;padding:14px 20px}
+.dvs h3{margin:0;white-space:nowrap}
+.dvs p{font-size:18px;line-height:1.4;color:#c9d0db}
+.dvs p b{color:var(--text)}
+.foot{position:absolute;left:56px;right:56px;bottom:30px;display:flex;justify-content:space-between;align-items:flex-end;color:#6b7383;font-size:16px;line-height:1.4}
+.foot b{color:var(--mute)}
+.tag{font-family:Bahnschrift;color:var(--cyan);font-size:19px;letter-spacing:.2em}
+</style></head><body><div class="wrap">
+<div class="kicker">Z² RE:CONNECT · DJAY PRO MAPPING</div>
+<h1>What does <span>each control do?</span></h1>
+<div class="chips"><span><b>4 decks</b> on iPad</span><span><b>djay mixes</b> internally</span><span><b>DVS</b> via REL/INTL</span><span>4 pad layers</span><span><b>Cue colours</b> + meters</span></div>
+
+<div class="cols">
+<div class="col">
+ <div class="card"><h3>MIXER</h3>
+  <div class="r"><span class="k">GAIN · HI · MID · LOW</span><span class="v">Gain + EQ deck 1 / 2</span></div>
+  <div class="r"><span class="k">FILTER</span><span class="v">Filter deck 1 / 2</span></div>
+  <div class="r"><span class="k">FADER A / B</span><span class="v">Volume deck 1 / 2</span></div>
+  <div class="r"><span class="k">DECK C / D VOL</span><span class="v">Volume deck 3 / 4</span></div>
+  <div class="r"><span class="k">CUE A / B</span><span class="v">Headphone cue deck 1 / 2<span class="s">deck 3 / 4</span></span></div>
+  <div class="r"><span class="k">XF · XF CURVE</span><span class="v">Crossfader + curve</span></div>
+  <div class="r"><span class="k">XF-REVERSE</span><span class="v">Hamster mode on/off</span></div>
+  <div class="r"><span class="k">PHONES · CUE MIX</span><span class="v">Headphones · cue/mix</span></div>
+  <div class="r"><span class="k">MASTER · BOOTH</span><span class="v">Main and booth</span></div>
+  <div class="r"><span class="k">MIC · VOL · TONE</span><span class="v">Mic on/off · level · echo</span></div>
+ </div>
+ <div class="card c"><h3>EFFECTS</h3>
+  <div class="r"><span class="k">A-FX1/2 · B-FX1/2</span><span class="v">FX 1 / FX 2 on deck 1 / 2</span></div>
+  <div class="r"><span class="k">DRY/WET</span><span class="v">FX 1 Wet/Dry</span></div>
+  <div class="r"><span class="k">FX KNOB</span><span class="v">FX 1 Parameter</span></div>
+  <div class="r"><span class="k">FX1 ON / FX2 ON</span><span class="v"><b style="color:var(--text)">Echo out</b> deck 1 / 2</span></div>
+ </div>
+</div>
+<div class="col">
+ <div class="card c"><h3>LIBRARY</h3>
+  <div class="r"><span class="k">BROWSE turn</span><span class="v">Scroll tracks<span class="s">scroll sources</span></span></div>
+  <div class="r"><span class="k">BROWSE push</span><span class="v">Sources ↔ tracks<span class="s">back</span></span></div>
+  <div class="r"><span class="k">LOAD A / B</span><span class="v">Load to deck 1 / 2<span class="s">to deck 3 / 4</span></span></div>
+  <div class="r"><span class="k">SNAP</span><span class="v">Show/hide library</span></div>
+  <div class="r"><span class="k">SETTINGS</span><span class="v">Switch view</span></div>
+  <div class="r"><span class="k">QUANT</span><span class="v">Quantize on/off</span></div>
+ </div>
+ <div class="card"><h3>DECK</h3>
+  <div class="r"><span class="k">REL / INTL</span><span class="v">DVS on/off (timecode)</span></div>
+  <div class="r"><span class="k">SYNC</span><span class="v">Sync<span class="s">sync master</span></span></div>
+  <div class="r"><span class="k">FLUX</span><span class="v">Slip mode</span></div>
+  <div class="r"><span class="k">LOOP turn</span><span class="v">Loop length<span class="s">move loop</span></span></div>
+  <div class="r"><span class="k">LOOP push</span><span class="v">Auto loop on/off<span class="s">reloop</span></span></div>
+  <div class="r"><span class="k">TRAKTOR</span><span class="v">Input select (hardware)</span></div>
+ </div>
+</div>
+
+<div class="card pads"><h3>PADS · LAYERS VIA DECK A + C (RIGHT: B + D)</h3>
+ <div class="lay">
+  <div class="ly" style="--c:var(--l1)"><div class="n">LAYER 1</div><div class="t">Cues 1–4</div><div class="d">in cue colour · SHIFT deletes</div><div class="btns"><u>A</u><u>C</u></div></div>
+  <div class="ly" style="--c:var(--l2)"><div class="n">LAYER 2</div><div class="t">Cues 5–8</div><div class="d">in cue colour · SHIFT deletes</div><div class="btns"><u class="on">A</u><u>C</u></div></div>
+  <div class="ly" style="--c:var(--l3)"><div class="n">LAYER 3</div><div class="t">Neural Mix</div><div class="d">Vocals · melody · bass · drums</div><div class="btns"><u>A</u><u class="on">C</u></div></div>
+  <div class="ly" style="--c:var(--l4)"><div class="n">LAYER 4</div><div class="t">free</div><div class="d">map it your way</div><div class="btns"><u class="on">A</u><u class="on">C</u></div></div>
+ </div></div>
+<div class="card c dvs"><h3>DVS</h3><p>For timecode, set the inputs in djay’s audio settings: <b style="white-space:nowrap">deck A = channels 3/4</b>, <b style="white-space:nowrap">deck B = channels 5/6</b>. Then switch it on with <b>REL / INTL</b>.</p></div>
+</div></div>
+<div class="foot"><div><b>Requires the Z² Re:Connect 0.9.0 Beta 2 firmware · mapping version 8.</b><br>Unofficial community project, not affiliated with Native Instruments or Algoriddim.</div><div class="tag">Z² Re:Connect</div></div>
+</body></html>

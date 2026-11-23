@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Z2 Pad-Ebenen</title><style>
+:root{--bg:#0c0e12;--panel:#151922;--line:#262c38;--text:#eef1f6;--mute:#9aa3b2;--acc:#ff7a1a;--cyan:#35c8ff}
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:1080px;height:1350px;background:var(--bg);color:var(--text);font-family:"Segoe UI",system-ui,sans-serif;overflow:hidden;position:relative}
+body:before{content:"";position:absolute;inset:0;background:radial-gradient(900px 600px at 90% -10%,rgba(53,200,255,.16),transparent 60%),radial-gradient(800px 600px at -10% 110%,rgba(255,122,26,.14),transparent 60%)}
+.wrap{position:relative;padding:52px 56px 0}
+.kicker{font-family:Bahnschrift,"Segoe UI";letter-spacing:.3em;font-size:20px;color:var(--cyan);font-weight:600}
+h1{font-family:Bahnschrift,"Segoe UI";font-weight:700;font-size:62px;line-height:1.02;margin-top:10px}
+h1 span{color:var(--cyan)}
+.lead{font-size:21px;line-height:1.45;color:#c9d0db;margin-top:16px;max-width:950px}
+.lead b{color:var(--text)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:28px}
+.lay{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px 20px 22px 24px;position:relative;overflow:hidden}
+.lay:before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--c)}
+.top{display:flex;justify-content:space-between;align-items:flex-start}
+.n{font-family:Bahnschrift;font-size:16px;color:var(--mute);letter-spacing:.14em}
+.t{font-family:Bahnschrift;font-size:32px;font-weight:600;margin-top:2px}
+.d{font-size:17px;color:var(--mute);margin-top:3px}
+.dk{display:flex;gap:8px}
+.dk u{text-decoration:none;font-family:Bahnschrift;font-weight:700;font-size:16px;width:46px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;border:1px solid #3a4150;color:#5d6574;background:#0f1218}
+.dk u.on{color:#111;background:#ffb15e;border-color:#ffb15e;box-shadow:0 0 14px rgba(255,177,94,.55)}
+.pads{display:flex;gap:12px;margin-top:20px}
+.pads i{flex:1;height:92px;border-radius:10px;background:var(--p);box-shadow:0 0 18px color-mix(in srgb,var(--p) 55%,transparent),inset 0 0 0 1px rgba(255,255,255,.18)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px 22px}
+.card h3{font-family:Bahnschrift,"Segoe UI";font-size:21px;letter-spacing:.14em;font-weight:600;color:var(--acc);margin-bottom:8px;text-transform:uppercase}
+.card.c h3{color:var(--cyan)}
+.card li{list-style:none;font-size:19.5px;line-height:1.35;color:#c9d0db;padding:6px 0;border-top:1px solid #1e2430}
+.card li:first-child{border-top:0}
+.card li b{color:var(--text)}
+.tech{margin-top:18px;font-size:17.5px;line-height:1.45;color:var(--mute)}
+.foot{position:absolute;left:56px;right:56px;bottom:30px;display:flex;justify-content:space-between;align-items:flex-end;color:#6b7383;font-size:16px;line-height:1.4}
+.foot b{color:var(--mute)}
+.tag{font-family:Bahnschrift;color:var(--cyan);font-size:19px;letter-spacing:.2em}
+</style></head><body><div class="wrap"><div class="kicker">Z² RE:CONNECT 0.9.0 BETA 2 · GUIDE</div><h1>Four layers <span>per pad row</span></h1><div class="lead"><b>DECK A</b> and <b>DECK C</b> switch the left pads, <b>DECK B</b> and <b>DECK D</b> the right ones. Each button turns its light on or off. The two DECK LEDs show which layer is active.</div><div class="grid"><div class="lay" style="--c:#3a7bff"><div class="top"><div><div class="n">LAYER 1</div><div class="t">Cues 1–4</div><div class="d">Pads light up in the cue colour from djay</div></div><div class="dk"><u>A</u><u>C</u></div></div><div class="pads"><i style="--p:#ff3b3b"></i><i style="--p:#ff8a1f"></i><i style="--p:#3a7bff"></i><i style="--p:#ffd23a"></i></div></div><div class="lay" style="--c:#b04dff"><div class="top"><div><div class="n">LAYER 2</div><div class="t">Cues 5–8</div><div class="d">Pads light up in the cue colour from djay</div></div><div class="dk"><u class="on">A</u><u>C</u></div></div><div class="pads"><i style="--p:#ffd23a"></i><i style="--p:#3a7bff"></i><i style="--p:#ff8a1f"></i><i style="--p:#ff3b3b"></i></div></div><div class="lay" style="--c:#ffd23a"><div class="top"><div><div class="n">LAYER 3</div><div class="t">Neural Mix</div><div class="d">Vocals · Melody · Bass · Drums</div></div><div class="dk"><u>A</u><u class="on">C</u></div></div><div class="pads"><i style="--p:#ffd23a"></i><i style="--p:#ffd23a"></i><i style="--p:#ffd23a"></i><i style="--p:#ffd23a"></i></div></div><div class="lay" style="--c:#f4f4f4"><div class="top"><div><div class="n">LAYER 4</div><div class="t">free</div><div class="d">for your own mapping</div></div><div class="dk"><u class="on">A</u><u class="on">C</u></div></div><div class="pads"><i style="--p:#f4f4f4"></i><i style="--p:#f4f4f4"></i><i style="--p:#f4f4f4"></i><i style="--p:#f4f4f4"></i></div></div></div><div class="row"><div class="card"><h3>How it works</h3><ul><li><b>No</b> DECK LED lit → layer 1</li><li>Only <b>DECK A</b> lit → layer 2</li><li>Only <b>DECK C</b> lit → layer 3</li><li><b>A and C</b> lit → layer 4</li><li><b>SHIFT + pad</b> deletes the cue</li><li>Same on the right with <b>DECK B / D</b></li></ul></div><div class="card c"><h3>New in Beta 2</h3><ul><li><b>Cue colours</b>: the pads show the colour the cue has in djay</li><li><b>Level meters A / B</b> follow the level of deck 1 / 2</li><li><b>Unplug and replug USB</b>: the LEDs come straight back</li></ul></div></div><div class="tech">Under the hood: each layer sends on its own MIDI channel (1, 4, 5, 6). The firmware remembers the LEDs of every layer, so the pads are right the moment you switch.</div></div><div class="foot"><div><b>Needs Z² Re:Connect 0.9.0 Beta 2 and djay mapping version 8.</b><br>Unofficial community project, not by Native Instruments or Algoriddim.</div><div class="tag">Z² Re:Connect</div></div></body></html>

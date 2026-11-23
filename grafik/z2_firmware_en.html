@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Z2 iOS Firmware</title>
+<style>
+:root{--bg:#0c0e12;--panel:#151922;--line:#262c38;--text:#eef1f6;--mute:#9aa3b2;--acc:#ff7a1a;--cyan:#35c8ff;
+--l1:#3a7bff;--l2:#b04dff;--l3:#ffd23a;--l4:#f4f4f4}
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:1080px;height:1350px;background:var(--bg);color:var(--text);font-family:"Segoe UI",system-ui,sans-serif;overflow:hidden;position:relative}
+body:before{content:"";position:absolute;inset:0;background:radial-gradient(900px 600px at 85% -10%,rgba(255,122,26,.20),transparent 60%),radial-gradient(800px 600px at -10% 110%,rgba(53,200,255,.14),transparent 60%)}
+.wrap{position:relative;padding:56px 60px 0}
+.kicker{font-family:Bahnschrift,"Segoe UI";letter-spacing:.32em;font-size:22px;color:var(--acc);font-weight:600}
+h1{font-family:Bahnschrift,"Segoe UI";font-weight:700;font-size:80px;line-height:.95;margin-top:12px;letter-spacing:-.01em}
+h1 span{color:var(--acc)}
+.sub{font-size:25px;color:var(--mute);margin-top:16px;line-height:1.35;max-width:960px}
+.sub b{color:var(--text);font-weight:600}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:30px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:22px 26px}
+.card h3{font-family:Bahnschrift,"Segoe UI";font-size:28px;font-weight:600;display:flex;align-items:center;gap:14px}
+.card p{color:var(--mute);font-size:19.5px;line-height:1.38;margin-top:8px}
+.card p b{color:var(--text);font-weight:600}
+.ico{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;font-size:22px;background:rgba(255,122,26,.15);color:var(--acc);flex:none}
+.ico.c{background:rgba(53,200,255,.15);color:var(--cyan)}
+.wide{grid-column:1/3}
+.layers{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
+.ly{border-radius:16px;padding:16px 16px 14px;background:#0f1218;border:1px solid var(--line)}
+.ly .n{font-family:Bahnschrift;font-size:20px;color:var(--mute);letter-spacing:.12em}
+.ly .t{font-size:22px;font-weight:600;margin-top:4px}
+.ly .k{font-size:17px;color:var(--mute);margin-top:4px}
+.pads{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:12px}
+.pads i{display:block;height:26px;border-radius:7px}
+.btns{display:flex;gap:8px;margin-top:10px}
+.btns u{text-decoration:none;font-family:Bahnschrift;font-size:15px;padding:3px 9px;border-radius:6px;border:1px solid #3a4150;color:#6b7383}
+.btns u.on{color:#111;background:#ffb15e;border-color:#ffb15e}
+.soon{display:flex;gap:10px;flex-wrap:wrap;margin-top:0}
+.soon span{font-size:18px;padding:6px 13px;border-radius:999px;border:1px dashed #4a5263;color:var(--mute)}
+.foot{position:absolute;left:60px;right:60px;bottom:36px;display:flex;justify-content:space-between;align-items:flex-end;color:#6b7383;font-size:17px;line-height:1.4}
+.foot b{color:var(--mute)}
+.tag{font-family:Bahnschrift;color:var(--acc);font-size:20px;letter-spacing:.2em}
+</style></head><body><div class="wrap">
+<div class="kicker">Z² RE:CONNECT · FIRMWARE FOR TRAKTOR KONTROL Z2</div>
+<h1>Your Z2 on the <span>iPad</span>.<br>No drivers.</h1>
+<p class="sub">Z² Re:Connect makes the Z2 <b>class compliant</b>: audio <b>and</b> MIDI work straight on iPad and iPhone, e.g. with djay Pro, 4 decks and DVS.</p>
+
+<div class="grid">
+ <div class="card wide"><h3><span class="ico">♪</span>Built-in USB MIDI</h3>
+  <p><b>All 48 buttons, 26 knobs and faders and 3 encoders</b> send MIDI. On connect, every knob and fader position is sent once, so the app starts in sync.</p></div>
+
+ <div class="card wide"><h3><span class="ico">▦</span>4 pad layers per deck</h3>
+  <p>Switch with <b>DECK A / C</b> (right side <b>B / D</b>). Each layer sends on its own MIDI channel and has its own colour. The firmware remembers every layer, so the pads show the right state the moment you switch.</p>
+  <div class="layers">
+   <div class="ly"><div class="n">LAYER 1 · CH 1</div><div class="t">Cues 1–4</div><div class="btns"><u>A</u><u>C</u></div>
+    <div class="pads"><i style="background:var(--l1)"></i><i style="background:var(--l1)"></i><i style="background:#1a2233"></i><i style="background:var(--l1)"></i></div></div>
+   <div class="ly"><div class="n">LAYER 2 · CH 4</div><div class="t">Cues 5–8</div><div class="btns"><u class="on">A</u><u>C</u></div>
+    <div class="pads"><i style="background:var(--l2)"></i><i style="background:#261a33"></i><i style="background:var(--l2)"></i><i style="background:#261a33"></i></div></div>
+   <div class="ly"><div class="n">LAYER 3 · CH 5</div><div class="t">Neural Mix</div><div class="btns"><u>A</u><u class="on">C</u></div>
+    <div class="pads"><i style="background:var(--l3)"></i><i style="background:var(--l3)"></i><i style="background:#332c14"></i><i style="background:var(--l3)"></i></div></div>
+   <div class="ly"><div class="n">LAYER 4 · CH 6</div><div class="t">free to map</div><div class="btns"><u class="on">A</u><u class="on">C</u></div>
+    <div class="pads"><i style="background:#2a2a2a"></i><i style="background:var(--l4)"></i><i style="background:#2a2a2a"></i><i style="background:#2a2a2a"></i></div></div>
+  </div></div>
+
+ <div class="card"><h3><span class="ico c">⇄</span>Nothing lost</h3>
+  <p>Audio, the built-in mixer, <b>timecode via the TRAKTOR buttons</b> and Traktor on your computer work just like before.</p></div>
+ <div class="card"><h3><span class="ico">✓</span>Stable and reversible</h3>
+  <p>No USB dropouts in long-run tests. <b>The factory image is never touched</b>, and the original firmware 42 can be restored at any time.</p></div>
+
+ <div class="card wide" style="display:flex;align-items:center;gap:18px;padding:16px 22px"><h3 style="flex:none"><span class="ico c">→</span>Coming</h3>
+  <div class="soon"><span>Cycle FX 1 → 2 → 3</span><span>Loop size on the 7&#8209;segment display</span><span>XF reverse LED</span></div></div>
+</div></div>
+<div class="foot"><div><b>Unofficial community project</b>, not affiliated with Native Instruments.<br>Version 0.9.0 Beta 1 · based on NI firmware 42 · use at your own risk.</div><div class="tag">Z² Re:Connect</div></div>
+</body></html>
