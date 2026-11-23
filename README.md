@@ -10,6 +10,14 @@ Zum Beispiel mit djay Pro (4 Decks, DVS), mit vier Pad-Ebenen pro Deck, Cue-Farb
 > **Privates Hobby-Projekt ohne kommerziellen Hintergrund. Kein Produkt von Native Instruments oder Algoriddim.
 > Benutzung auf eigene Gefahr, ohne jede Gewähr.** Aktueller Stand: **0.9.0 Beta 2**, ein öffentlicher Testlauf.
 
+## Warum dieses Projekt?
+Ich bin kein Programmierer und kein IT-Spezialist, sondern lege seit vielen Jahren als DJ auf. Meine DJ-Hardware fand ich
+immer toll, und es hat mich traurig gemacht, dass man manche Geräte irgendwann einfach nicht mehr benutzen kann. Es ist
+sehr schade, guten Geräten beim Verstauben zuzusehen, bis sie am Ende auf dem Müll landen.
+
+So ist die Idee zum **Re:Connect-Projekt** entstanden: alter DJ- und Musik-Hardware neues Leben einhauchen.
+Der Traktor Kontrol Z2 ist das erste Gerät.
+
 ## Herunterladen und installieren
 Die fertigen Programme liegen unter **[Releases](../../releases)** (rechts auf dieser Seite):
 
@@ -59,3 +67,9 @@ Download the installer for Windows or macOS from **[Releases](../../releases)**;
 on the first page. It always backs up your current firmware first and only writes if your Z2 runs exactly NI firmware 42
 (or an older Z2-Re:Connect build). No Native Instruments firmware is included in this repository. Hobby project, not
 affiliated with Native Instruments or Algoriddim, no warranty, use at your own risk.
+
+### Why this project?
+I'm not a programmer or an IT specialist. I've been a DJ for a long time and always loved my DJ gear, and it made me sad
+that some of it simply can't be used anymore. It's a real shame to watch good equipment gather dust until it ends up in
+the bin. That's how the idea for the **Re:Connect project** came about: breathing new life into old DJ and music hardware.
+The Traktor Kontrol Z2 is the first device.
