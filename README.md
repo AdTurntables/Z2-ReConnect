@@ -1,4 +1,10 @@
-# Z2-Re:Connect
+<h1 align="center">Re:Connect</h1>
+
+<p align="center">
+  <img src="grafik/re_connect_intro.gif" alt="Z2 Re:Connect animation" width="400">
+</p>
+
+## Z2-Re:Connect
 
 **Use the Native Instruments Traktor Kontrol Z2 on iPad and iPhone without drivers: audio and USB-MIDI.**
 For example with djay Pro (4 decks, DVS), with four pad layers per deck, cue colours on the pads and level meters.
