@@ -18,6 +18,10 @@ For example with djay Pro (4 decks, DVS), with four pad layers per deck, cue col
 > **Private hobby project with no commercial background. Not a product of Native Instruments or Algoriddim.
 > Use at your own risk, without any warranty.** Current version: **0.9.0 Beta 2**, a public test run.
 
+> [!WARNING]
+> **Known issues:** There are currently **problems with the Mac version** of the installer, and **not all Z2 units are
+> supported yet**. We're working on a fix.
+
 ## Why this project?
 I'm not a programmer or an IT specialist. I've been a DJ for many years and always loved my DJ gear, and it made me sad
 that some devices simply can't be used anymore at some point. It's a real shame to watch good equipment gather dust until
@@ -80,6 +84,10 @@ Zum Beispiel mit djay Pro (4 Decks, DVS), mit vier Pad-Ebenen pro Deck, Cue-Farb
 
 > **Privates Hobby-Projekt ohne kommerziellen Hintergrund. Kein Produkt von Native Instruments oder Algoriddim.
 > Benutzung auf eigene Gefahr, ohne jede Gewähr.** Aktueller Stand: **0.9.0 Beta 2**, ein öffentlicher Testlauf.
+
+> [!WARNING]
+> **Bekannte Probleme:** Mit der **Mac-Version** des Installers gibt es derzeit **Probleme**, und **noch nicht alle Z2
+> werden unterstützt**. An einer Lösung wird gearbeitet.
 
 ## Warum dieses Projekt?
 Ich bin kein Programmierer und kein IT-Spezialist, sondern lege seit vielen Jahren als DJ auf. Meine DJ-Hardware fand ich
