@@ -49,6 +49,18 @@ T = {
                    "Bitte zuerst mit dem Programm von Native Instruments auf Firmware 42 aktualisieren.",
                    "The Z2 returns no firmware. It probably still runs the factory firmware without an update. "
                    "Update it to firmware 42 with the Native Instruments tool first."),
+    "read_empty_ver": ("Der Z2 meldet die Geräteversion %d und gibt seine Firmware nicht heraus. Z² Re:Connect braucht die "
+                       "Original-Firmware 42 von Native Instruments (Geräteversion 42).\n\n"
+                       "Bitte zuerst den „Device Updater“ von Native Instruments starten (Windows oder Mac):\n"
+                       "• Bietet er ein Update für den Z2 an: installieren und danach diesen Installer erneut starten.\n"
+                       "• Meldet er, der Z2 sei aktuell: bitte die angezeigte Firmware-Version und die Datei "
+                       "„Z2-ReConnect-Diagnose.txt“ (im Backup-Ordner) an den Entwickler schicken. Am Z2 wurde nichts verändert.",
+                       "The Z2 reports device version %d and does not hand out its firmware. Z² Re:Connect needs the "
+                       "Native Instruments original firmware 42 (device version 42).\n\n"
+                       "Please run the Native Instruments 'Device Updater' first (Windows or Mac):\n"
+                       "• If it offers an update for the Z2: install it, then start this installer again.\n"
+                       "• If it says the Z2 is up to date: please send the firmware version it shows and the file "
+                       "'Z2-ReConnect-Diagnose.txt' (in the backup folder) to the developer. Nothing on the Z2 was changed."),
     "read_diff": ("Zwei Lesedurchgänge ergaben unterschiedliche Daten. Abbruch – bitte USB-Kabel und Anschluss prüfen.",
                   "Two read passes returned different data. Stopping – check the USB cable and port."),
     "fw_is": ("Firmware im Gerät: %s\n  %d Bytes, SHA-256 %s", "Firmware in the device: %s\n  %d bytes, SHA-256 %s"),
@@ -404,13 +416,30 @@ class Installer:
             raise
         if info["vid"] != VID or info["pid"] not in (PID_RUN, PID_DFU): raise Z2Error(t("nodev"))
         say("found", info["vid"], info["pid"], info["bcd"])
+        self.bcd = info["bcd"]
+        self.diag = ["%s %s, %s, USB %04x:%04x, bcdDevice 0x%04x" % (PRODUCT, VERSION, sys.platform, info["vid"], info["pid"], info["bcd"])]
         return info
+
+    def _note(self, msg):
+        """Diagnose-Zeile (geht bei leerer Firmware in Z2-ReConnect-Diagnose.txt im Backup-Ordner)."""
+        if not hasattr(self, "diag"): self.diag = []
+        self.diag.append(msg)
+        print("[diag] " + msg, file=sys.stderr, flush=True)
+
+    def _write_diag(self):
+        try:
+            os.makedirs(self.backup_dir, exist_ok=True)
+            p = os.path.join(self.backup_dir, "Z2-ReConnect-Diagnose.txt")
+            open(p, "w", encoding="utf-8").write("\n".join(getattr(self, "diag", [])) + "\n")
+        except OSError:
+            pass
 
     def _idle(self):
         """Bringt die DFU-Schnittstelle in den Ruhezustand (nach dem Start steht sie oft auf dfuERROR)."""
         for _ in range(5):
             try: st = self.b.get_state()
-            except OSError: st = STATE_ERROR
+            except OSError as e: st = STATE_ERROR; self._note("get_state: %s" % e)
+            self._note("state %s" % st)
             if st in (0, STATE_IDLE): return
             try: self.b.clr_status()
             except OSError: pass
@@ -421,6 +450,7 @@ class Installer:
         data, block = bytearray(), 0
         while True:
             chunk = self.b.upload(block)
+            if block == 0: self._note("upload block 0: %d bytes" % len(chunk))
             data += chunk; block += 1
             if len(chunk) < XFER: break
             if len(data) > MAX_IMAGE: raise Z2Error("image too large")
@@ -437,11 +467,17 @@ class Installer:
                 try:
                     data = self._read_once()
                 except OSError as e:
-                    if attempt == 3: raise Z2Error(t("read_fail", e))
+                    self._note("read error: %s" % e)
+                    if attempt == 3: self._write_diag(); raise Z2Error(t("read_fail", e))
                     data = b""
                 if data: break
                 self.sleep(3)
-            if not data: raise Z2Error(t("read_empty"))
+            if not data:
+                try: self._note("status %s" % self.b.get_status().hex())
+                except OSError as e: self._note("get_status: %s" % e)
+                self._write_diag()
+                bcd = getattr(self, "bcd", 42)
+                raise Z2Error(t("read_empty") if bcd == 42 else t("read_empty_ver", bcd))
             got.append(data)
         if any(g != got[0] for g in got): raise Z2Error(t("read_diff"))
         return got[0]

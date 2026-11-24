@@ -82,5 +82,13 @@ bad = os.path.join(d, b[0]); raw = bytearray(open(bad, "rb").read()); raw[30000]
 f = Fake(DST)
 rc = zi.main(["restore", bad, "--lang", "en", "--backup-dir", d], backend=f, ask=lambda p: "YES")
 res.append(rc == 1 and f.flash == DST and f.writes == 0); print("=== damaged backup refused:", res[-1], "\n")
+# device with another firmware (bcdDevice 0x33 = 51) that hands out no image: clear message, diagnosis file, nothing written
+class Fake51(Fake):
+    def open(self): super().open(); return {"vid": 0x17CC, "pid": 0x1130, "bcd": 0x0033}
+f = Fake51(b""); d51 = tempfile.mkdtemp()
+rc = zi.main(["install", "--lang", "en", "--backup-dir", d51], backend=f, ask=lambda p: "YES")
+diag = os.path.join(d51, "Z2-ReConnect-Diagnose.txt")
+res.append(rc != 0 and f.writes == 0 and os.path.isfile(diag) and "0x0033" in open(diag).read())
+print("=== firmware 51 / no image: refused, diagnosis written:", res[-1], "\n")
 print("ALL PASS" if all(res) else "FAILURES: %s" % res)
 sys.exit(0 if all(res) else 1)
