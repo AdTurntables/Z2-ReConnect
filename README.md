@@ -6,8 +6,14 @@
 
 ## Z2-Re:Connect
 
-**Use the Native Instruments Traktor Kontrol Z2 on iPad and iPhone without drivers: audio and USB-MIDI.**
+**Use the Native Instruments Traktor Kontrol Z2 without drivers on iPad and iPhone, and as a standard USB device
+probably also on Android, Mac and Linux: audio and USB-MIDI.**
 For example with djay Pro (4 decks, DVS), with four pad layers per deck, cue colours on the pads and level meters.
+
+| Device | Status |
+|---|---|
+| iPad, iPhone (djay Pro) | **tested** |
+| Android, Mac, Linux | should work: the Z2 then reports itself as a standard USB device (USB Audio Class 2.0 + USB-MIDI). **Not tested yet.** On some Android devices only stereo may reach the apps; the device must support USB host (OTG). Feedback welcome. |
 
 *[Deutsche Version weiter unten](#deutsch)*
 
@@ -102,7 +108,7 @@ Backups (`*.z2backup`) contain the original firmware and must **not** be shared.
 
 ## Feedback
 Please report bugs, questions and test reports as an **[issue](../../issues)**. Helpful details: operating system,
-iPad/iPhone model, app, and what exactly happened.
+device model (iPad/iPhone/Android …), app, and what exactly happened.
 
 ## License
 Own code and own documents: [MIT](LICENSE).
@@ -112,8 +118,14 @@ Own code and own documents: [MIT](LICENSE).
 <a id="deutsch"></a>
 # Z2-Re:Connect (Deutsch)
 
-**Den Native Instruments Traktor Kontrol Z2 ohne Treiber am iPad und iPhone nutzen: Audio und USB-MIDI.**
+**Den Native Instruments Traktor Kontrol Z2 ohne Treiber am iPad und iPhone nutzen und als Standard-USB-Gerät
+wahrscheinlich auch an Android, Mac und Linux: Audio und USB-MIDI.**
 Zum Beispiel mit djay Pro (4 Decks, DVS), mit vier Pad-Ebenen pro Deck, Cue-Farben auf den Pads und Pegelanzeigen.
+
+| Gerät | Stand |
+|---|---|
+| iPad, iPhone (djay Pro) | **getestet** |
+| Android, Mac, Linux | sollte gehen: Der Z2 meldet sich dann als Standard-USB-Gerät (USB Audio Class 2.0 + USB-MIDI). **Noch nicht getestet.** Bei manchen Android-Geräten kommt eventuell nur Stereo bei den Apps an; das Gerät muss USB-Host (OTG) können. Rückmeldungen erwünscht. |
 
 ![Vier Ebenen pro Pad-Reihe](grafik/z2_ebenen.png)
 
@@ -205,7 +217,7 @@ Backups (`*.z2backup`) enthalten die Original-Firmware und dürfen **nicht** wei
 „Native Instruments“, „Traktor“ und „Kontrol“ sind Marken von Native Instruments, „djay“ von Algoriddim.
 
 ## Rückmeldungen
-Fehler, Fragen und Testberichte bitte als **[Issue](../../issues)** melden. Hilfreich sind: Betriebssystem, iPad/iPhone-Modell,
+Fehler, Fragen und Testberichte bitte als **[Issue](../../issues)** melden. Hilfreich sind: Betriebssystem, Gerätemodell (iPad/iPhone/Android …),
 App, und was genau passiert ist.
 
 ## Lizenz

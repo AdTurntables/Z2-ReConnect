@@ -1,6 +1,7 @@
 # Z2-Re:Connect 0.9.0 Beta 2 – Installer
 
-Z2-Re:Connect bringt den Native Instruments Traktor Kontrol Z2 ohne Treiber ans iPad und iPhone: Audio **und** USB-MIDI,
+Z2-Re:Connect bringt den Native Instruments Traktor Kontrol Z2 ohne Treiber ans iPad und iPhone (als Standard-USB-Gerät
+wahrscheinlich auch an Android, Mac und Linux, dort noch ungetestet): Audio **und** USB-MIDI,
 zum Beispiel mit djay Pro (4 Decks, DVS), dazu vier Pad-Ebenen pro Deck über DECK A/C bzw. B/D.
 **0.9.0 Beta 2 ist der zweite öffentliche Testlauf** (neu: Cue-Farben, Pegelanzeigen A/B, LEDs nach USB-Neuverbinden). Rückmeldungen von Testern sind ausdrücklich erwünscht.
 English: start the program with `--lang en`; all prompts are available in English.

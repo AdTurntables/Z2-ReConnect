@@ -24,13 +24,15 @@ G = {
                  "A backup of the firmware in the Z2 is saved automatically on every check."),
     "back": ("< Zurück", "< Back"), "next": ("Weiter >", "Next >"), "cancel": ("Abbrechen", "Cancel"),
     "close": ("Schließen", "Close"), "advanced": ("Erweitert …", "Advanced …"),
-    "welcome_sub": ("Der Traktor Kontrol Z2 am iPad und iPhone – ohne Treiber.",
-                    "The Traktor Kontrol Z2 on iPad and iPhone – no drivers."),
-    "welcome_body": ("Dieser Assistent bringt die Firmware %s auf deinen Z2: Audio und USB-MIDI direkt am iPad, "
+    "welcome_sub": ("Der Traktor Kontrol Z2 an iPad, iPhone und anderen Geräten – ohne Treiber.",
+                    "The Traktor Kontrol Z2 on iPad, iPhone and other devices – no drivers."),
+    "welcome_body": ("Dieser Assistent bringt die Firmware %s auf deinen Z2: Audio und USB-MIDI direkt am iPad "
+                     "(Standard-USB, sollte auch an Android, Mac und Linux gehen, dort ungetestet), "
                      "zum Beispiel mit djay Pro (4 Decks, DVS, vier Pad-Ebenen).\n\n"
                      "Vorher wird geprüft, ob dein Gerät passt, und die aktuelle Firmware wird gesichert. "
                      "Die Original-Firmware lässt sich jederzeit zurückspielen.",
-                     "This wizard puts the %s firmware on your Z2: audio and USB MIDI straight on the iPad, "
+                     "This wizard puts the %s firmware on your Z2: audio and USB MIDI straight on the iPad "
+                     "(standard USB, should also work with Android, Mac and Linux, untested there), "
                      "for example with djay Pro (4 decks, DVS, four pad layers).\n\n"
                      "It first checks that your device is suitable and backs up the current firmware. "
                      "The original firmware can be restored at any time."),
@@ -73,9 +75,9 @@ G = {
     "inst_fail": ("Die Installation wurde nicht abgeschlossen. Details siehe unten.",
                   "The installation did not complete. See details below."),
     "done_title": ("Fertig", "Done"),
-    "done_body": ("Der Z2 läuft jetzt mit %s.\n\nSchließe ihn ans iPad an: Er erscheint als Audio- und MIDI-Gerät. "
+    "done_body": ("Der Z2 läuft jetzt mit %s.\n\nSchließe ihn ans iPad an (oder an ein anderes Gerät mit USB-Audio/MIDI): Er erscheint als Audio- und MIDI-Gerät. "
                   "Das passende djay-Mapping (Version 8) gibt es als eigenes Paket „Z2-ReConnect-djay-Mapping“. Wie die Pad-Ebenen funktionieren, zeigt das Bild „Anleitung Pad-Ebenen“ neben diesem Programm.",
-                  "The Z2 now runs %s.\n\nConnect it to your iPad: it shows up as an audio and MIDI device. "
+                  "The Z2 now runs %s.\n\nConnect it to your iPad (or another device with USB audio/MIDI): it shows up as an audio and MIDI device. "
                   "The matching djay mapping (version 8) comes as a separate package, 'Z2-ReConnect-djay-Mapping'. The picture 'Guide pad layers' next to this program shows how the pad layers work."),
     "done_backup": ("Backup der vorherigen Firmware:", "Backup of the previous firmware:"),
     "adv_title": ("Erweitert", "Advanced"),

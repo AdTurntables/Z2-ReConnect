@@ -1,6 +1,7 @@
 # Z2 iOS-Firmware (Traktor Kontrol Z2, Basis NI-Firmware 42)
 
-Ziel: Der Z2 läuft am iPad/iPhone ohne Treiber, mit Audio **und** MIDI.
+Ziel: Der Z2 läuft ohne Treiber, mit Audio **und** MIDI nach USB-Standard (getestet am iPad/iPhone; Android, Mac und
+Linux sollten als Standard-Gerät ebenfalls gehen, ungetestet).
 
 ## Stand 20.11.2026
 | Test | Abbild | Ergebnis |

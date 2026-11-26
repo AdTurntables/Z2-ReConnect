@@ -1,6 +1,6 @@
 """Z² Re:Connect – Installer (Windows, macOS, Linux).
 
-Bringt die Firmware Z² Re:Connect (Audio + USB-MIDI am iPad/iPhone) auf einen Native Instruments Traktor Kontrol Z2:
+Bringt die Firmware Z² Re:Connect (Audio + USB-MIDI nach USB-Standard; getestet am iPad/iPhone) auf einen Native Instruments Traktor Kontrol Z2:
   1. liest die Firmware aus dem angeschlossenen Z2 (Backup),
   2. prueft, ob es genau eine Firmware ist, fuer die ein Patch gebaut und getestet wurde
      (Original-Firmware 42 von Native Instruments oder eine aeltere Z² Re:Connect-Version),
@@ -133,9 +133,9 @@ T = {
                     "und bleibt per USB erreichbar. Bitte aus- und einschalten und Menüpunkt 4 wiederholen.\nBackup: %s",
                     "Writing the backup back failed as well. In that case the Z2 boots its factory firmware and "
                     "stays reachable over USB. Switch it off and on and repeat menu item 4.\nBackup: %s"),
-    "done": ("\nFertig. Der Z2 läuft jetzt mit %s. Am iPad erscheint er als Audio- und MIDI-Gerät.\n"
+    "done": ("\nFertig. Der Z2 läuft jetzt mit %s. Am iPad (und anderen Geräten mit USB-Audio/MIDI) erscheint er als Audio- und MIDI-Gerät.\n"
              "Das passende djay-Mapping (Version 8) gibt es als eigenes Paket 'Z2-ReConnect-djay-Mapping'." % FW_NAME,
-             "\nDone. The Z2 now runs %s. On an iPad it shows up as an audio and MIDI device.\n"
+             "\nDone. The Z2 now runs %s. On an iPad (and other devices with USB audio/MIDI) it shows up as an audio and MIDI device.\n"
              "The matching djay mapping (version 8) comes as a separate package, 'Z2-ReConnect-djay-Mapping'." % FW_NAME),
     "restored": ("\nFertig. Das Backup ist zurückgeschrieben und geprüft.", "\nDone. The backup is written back and verified."),
     "no_backups": ("Keine Backups in %s gefunden.", "No backups found in %s."),
