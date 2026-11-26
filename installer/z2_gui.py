@@ -46,7 +46,8 @@ G = {
     "needs_win": ("Windows: Der Z2-Treiber von Native Instruments muss installiert sein.",
                   "Windows: the Native Instruments Z2 driver must be installed."),
     "notice_title": ("Bitte lesen", "Please read"),
-    "agree": "I have read and understood this notice. I use Z² Re:Connect entirely at my own risk.",
+    "agree": ("Ich habe diesen Hinweis gelesen und verstanden. Ich benutze Z² Re:Connect vollständig auf eigene Gefahr.",
+              "I have read and understood this notice. I use Z² Re:Connect entirely at my own risk."),
     "check_title": ("Gerät prüfen", "Check device"),
     "check_sub": ("Die Firmware wird zweimal aus dem Z2 gelesen, automatisch als Backup gespeichert und geprüft. "
                   "Auf den Z2 wird nichts geschrieben.",
@@ -119,6 +120,20 @@ if tk is not None:
             if "bg" in kw: self._bg = kw["bg"]
             return tk.Label.configure(self, cnf, **kw) if (cnf or kw) else tk.Label.configure(self)
         config = configure
+
+
+def make_gui_ask(zi, holder):
+    """The installer's ask() for the GUI. Every decision is taken in the main thread with a dialog and stored in
+    holder.gui_answers; the worker thread only gets answers by KEY (never by prompt text). Unknown key -> "-"."""
+    def ask(prompt, key=None):
+        a = getattr(holder, "gui_answers", {})
+        if key == "disclaimer": return zi.DISCLAIMER_WORD if a.get("disclaimer") else "-"
+        if key == "confirm": return zi.t("yes_word") if a.get("confirm") else "-"
+        if key in ("tester", "junk"): return zi.t("tester_word") if a.get(key) else "-"
+        if key == "refresh": return zi.t("yes_word") if a.get("refresh") else "-"
+        return "-"
+    ask.keyed = True
+    return ask
 
 
 def available():
@@ -390,7 +405,7 @@ class App:
         txt = tk.Text(fr, bg=PANEL, fg=TEXT, relief="flat", bd=0, wrap="word", padx=14, pady=12,
                       font=self.F(10), height=14)
         txt.pack(fill="both", expand=True, padx=1, pady=1)
-        body = "\n".join(l for l in self.zi.DISCLAIMER.strip("\n").splitlines() if not l.startswith("====")).strip()
+        body = "\n".join(l for l in self.zi.disclaimer_text().strip("\n").splitlines() if not l.startswith("====")).strip()
         lines = [l.strip() for l in body.splitlines()]
         para, out = [], []
         for l in lines:                             # Zeilen der Konsolenfassung zu Absaetzen zusammenfuegen
@@ -443,7 +458,10 @@ class App:
         def work():
             inst = self._installer()
             try:
-                return inst.check()[0]
+                kind = inst.check()[0]
+                self.bcd = getattr(inst, "bcd", None)
+                self.bridge_trial = getattr(inst, "bridge_trial", None)
+                return kind
             finally:
                 inst.b.close()
 
@@ -453,12 +471,28 @@ class App:
                 self.b_next.configure(text=self.g("check_again"), state="normal", command=self.run_check)
                 return
             self.kind = res
+            zi = self.zi
             if res in ("source", "older"):
                 self.status.configure(text="✓  " + self.g("res_ok" if res == "source" else "res_update"), fg=OK)
                 self.b_next.configure(state="normal")
             elif res == "target":
                 self.status.configure(text="✓  " + self.g("res_done") % self.zi.FW_NAME, fg=OK)
                 self.b_next.configure(state="normal", command=lambda: self.show(5))
+            elif res in ("factory_empty", "factory_junk"):     # Zwischenschritt (Tester-Funktion)
+                key = "verdict_bridge" if res == "factory_empty" else "verdict_bridge_junk"
+                self.status.configure(text="✓  " + zi.t(key).strip(), fg=OK)
+                self.b_next.configure(state="normal")
+            elif res in ("bridge", "bridge_other"):
+                q = self.bridge_trial or {"state": 0, "starts": 0, "max": 3}
+                st = zi.t("bridge_state")
+                text = zi.t("bridge_running", st[q["state"]] if q["state"] < len(st) else str(q["state"]),
+                            q["starts"], q["max"]).strip()
+                if res == "bridge_other":
+                    self.status.configure(text="!  " + text + "\n" + zi.t("bridge_other_advice").strip(), fg=BAD)
+                    self.b_next.configure(text=self.g("check_again"), state="normal", command=self.run_check)
+                else:
+                    self.status.configure(text="✓  " + text, fg=OK)
+                    self.b_next.configure(state="normal")
             else:
                 self.status.configure(text="✗  " + self.g("res_no"), fg=BAD)
                 self.b_next.configure(text=self.g("check_again"), state="normal", command=self.run_check)
@@ -479,8 +513,35 @@ class App:
 
     def run_install(self):
         if not self.accepted: self.show(2); return
-        if not self.dialog(self.g("inst_ask") % self.zi.FW_NAME):
+        zi = self.zi
+        bridge_kinds = ("factory_empty", "factory_junk", "bridge")
+        # every decision is taken HERE in the main thread; the worker only gets keyed answers (gui_answers)
+        self.gui_answers = {"disclaimer": True, "confirm": False, "tester": False, "junk": False, "refresh": False}
+        if self.kind in ("factory_empty", "factory_junk"):
+            if not self.dialog(zi.t("bridge_warn_gui")): return
+            if self.bcd not in zi.FACTORY_BCD_OK:
+                ver = zi.FACTORY_BCD_TESTER.get(self.bcd)
+                if ver is None: return
+                if not self.dialog(zi.t("bridge_untested", ver, zi.BRIDGE_LOG, zi.t("tester_word")).rsplit("\n", 1)[0].strip()):
+                    return
+                self.gui_answers["tester"] = True
+            if self.kind == "factory_junk":
+                if not self.dialog(zi.t("junk_confirm", zi.t("tester_word")).rsplit("\n", 1)[0].strip()): return
+                self.gui_answers["junk"] = True
+            self.gui_answers["confirm"] = True
+        elif self.kind == "bridge":
+            q = self.bridge_trial or {"starts": 0, "max": 3}
+            if q["starts"] < 2:
+                self.dialog(zi.t("bridge_handoff").strip(), question=False); return
+            if not self.dialog(zi.t("bridge_refresh_ask", q["starts"], q["max"], zi.t("yes_word")).rsplit("?", 1)[0].strip() + "?"):
+                self.dialog(zi.t("bridge_handoff").strip(), question=False); return
+            self.gui_answers["refresh"] = True
+        elif self.kind in ("source", "older"):
+            if not self.dialog(self.g("inst_ask") % self.zi.FW_NAME): return
+            self.gui_answers["confirm"] = True
+        else:
             return
+        expect = self.kind
         self.b_next.configure(state="disabled"); self.b_back.configure(state="disabled")
         self.status.configure(text=self.g("running"), fg=MUTE)
         self.prog["value"] = 0
@@ -490,17 +551,28 @@ class App:
             inst.on_progress = lambda pct: self.q.put(("progress", pct))
             self.writing = True
             try:
-                ok = inst.install()
-                return ok, inst.last_backup
+                ok = inst.install(expect_kind=expect)
+                return (ok, inst.last_backup, getattr(inst, "bridge_write_started", False),
+                        getattr(inst, "bridge_result", None), getattr(inst, "bridge_msg", None))
             finally:
                 self.writing = False
                 inst.b.close()
 
         def done(res, err):
+            if err is None and res[0] and expect in bridge_kinds:
+                q = res[3] or {"starts": 1, "max": 3}
+                self.prog["value"] = 100
+                self.status.configure(text="✓  " + zi.t("bridge_written", q["starts"], q["max"]).strip(), fg=OK)
+                self.dialog(zi.t("bridge_handoff").strip(), question=False)
+                self.b_back.configure(state="normal")
+                self.b_next.configure(state="normal", text=self.g("close"), command=self.quit)
+                return
             if err is None and res[0]:
                 self.backup_path = res[1]
                 self.show(5); return
-            self.status.configure(text="✗  " + self.g("inst_fail"), fg=BAD)
+            if err is None and expect in bridge_kinds and res[2]:          # writing had started
+                self.dialog(zi.t(res[4] or "bridge_fallback").strip(), question=False)
+            self.status.configure(text="✗  " + (self.g("inst_fail") if err is not None or res[2] else zi.t("cancel")), fg=BAD)
             self.b_back.configure(state="normal")
             self.b_next.configure(state="normal")
 
@@ -583,6 +655,7 @@ class App:
         if not path: return
         if not self.dialog(self.g("restore_ask") % os.path.basename(path)):
             return
+        self.gui_answers = {"confirm": True}                 # the user just confirmed in the dialog above
         self._task_page(self.g("adv_restore"))
 
         def work():
@@ -606,17 +679,16 @@ class App:
 
     # ------------------------------------------------------------------ Hintergrund-Arbeit
     def _installer(self):
-        zi = self.zi
-        word, yes = zi.DISCLAIMER_WORD, zi.t("yes_word")
-
-        def ask(prompt):
-            # Die Oberflaeche hat Hinweis und Schreiben schon selbst bestaetigen lassen.
-            return word if word in prompt else yes
-        return zi.Installer(zi.make_backend(), self.backup_dir, ask)
+        return self.zi.Installer(self.zi.make_backend(), self.backup_dir, make_gui_ask(self.zi, self))
 
     def start(self, work, done):
         self.busy = True
         self.b_adv.configure(state="disabled")
+        # while the worker runs, "Weiter" must not look clickable: grey + "Bitte warten ..." (Windows keeps the
+        # orange background of a disabled tk.Button, which looked active - tester feedback 26.11.2026)
+        self._next_text = self.b_next.cget("text")
+        self.b_next.configure(state="disabled", text=self.g("running"))
+        self._sync_buttons()
 
         def run():
             res, err = None, None
@@ -627,6 +699,16 @@ class App:
                 self.q.put(("log", "\n%s\n" % self.zi.t("err", e)))
             self.q.put(("done", (done, res, err)))
         threading.Thread(target=run, daemon=True).start()
+
+    def _sync_buttons(self):
+        """A disabled button looks disabled (grey, arrow cursor); an enabled primary button is orange again."""
+        for b, primary in ((self.b_next, True), (self.b_back, False), (self.b_cancel, False), (self.b_adv, False)):
+            try:
+                off = str(b.cget("state")) == "disabled"
+                b.configure(bg=PANEL if (off or not primary) else ACC, cursor="arrow" if off else "hand2",
+                            highlightbackground=LINE)
+            except (tk.TclError, AttributeError):
+                pass
 
     def _pump(self):
         try:
@@ -643,10 +725,14 @@ class App:
                 elif kind == "done":
                     self.busy = False
                     self.b_adv.configure(state="normal")
+                    if self.b_next.cget("text") == self.g("running"):
+                        self.b_next.configure(text=getattr(self, "_next_text", self.g("next")))
                     fn, res, err = val
                     fn(res, err)
+                    self._sync_buttons()
         except queue.Empty:
             pass
+        self._sync_buttons()                        # also catches state changes made outside start()/done
         self._after = self.root.after(60, self._pump)
 
 

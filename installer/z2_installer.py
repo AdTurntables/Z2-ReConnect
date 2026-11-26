@@ -28,6 +28,22 @@ XFER = 64
 MAX_IMAGE = 2 * 1024 * 1024
 STATE_IDLE, STATE_DNLOAD_IDLE, STATE_ERROR = 2, 5, 10
 
+# --- Zwischenschritt "Bridge" (Tester-Funktion, 26.11.2026). Nur aktiv, wenn die Bridge-Datei neben dem
+# Programm liegt (sie kommt nur ins Tester-Paket). Fuer Z2 mit Werks-Firmware und LEEREM Update-Platz:
+# die Bridge meldet Version 1, NIs Device Updater spielt dann Firmware 42 auf, danach laeuft der normale Weg.
+# Eigener Code (firmware/newfw/bridge, BRIDGE_STATUS.md), kein NI-Code, keine NI-Daten.
+BRIDGE_FILE = "z2rc_bridge.z2bridge"
+BRIDGE_SHA256 = "1cbeedc0109f79aac3d5887b28b9ed7e28a71164de027971d23336527c282543"   # am Geraet erprobt 26.11.2026
+# Only this build is read back completely or written again. Any other bridge build (they only ever existed
+# on the developer's unit) is identified by its header block alone and never read further: 2ef5b85e hangs
+# EP0 after a complete read, 9d880032 cannot rewrite itself (BRIDGE_STATUS "Befund 1/2").
+BRIDGE_HEAD_SHA256 = "e1ef9de0f68a8c9066b835e99ec931d62181438f3cf7d5561fad767cfb24e80d"   # its first UPLOAD block
+BRIDGE_BCD = 0x0001
+FACTORY_BCD_OK = {0x001E: 30}          # Werks-Firmware 30: der Weg ist an einem Geraet erprobt
+FACTORY_BCD_TESTER = {0x0033: 51}      # Werks-Firmware 51: unerprobt, nur mit eigenem Bestaetigungswort
+TRIAL_QUERY = 0xC7A0                   # UPLOAD-Block: Probestart-Bericht der Bridge ("Z2PB", nichts aendert sich)
+BRIDGE_LOG = "Z2-ReConnect-Bridge-Protokoll.txt"
+
 # ----------------------------------------------------------------------------- Texte
 T = {
     "title": (PRODUCT + " – Installer %s", PRODUCT + " – installer %s"),
@@ -129,6 +145,120 @@ T = {
     "same_already": ("Diese Firmware ist bereits im Gerät. Es ist nichts zu tun.", "This firmware is already in the device. Nothing to do."),
     "err": ("FEHLER: %s", "ERROR: %s"),
     "enter": ("\nEnter zum Beenden ...", "\nPress Enter to quit ..."),
+    "disclaimer_ask": ("Zum Fortfahren bitte %s eintippen (alles andere bricht ab): ",
+                       "Type %s to continue (anything else cancels): "),
+    "fw_factory_empty": ("Werks-Firmware %d mit leerem Update-Platz (es gibt nichts auszulesen)",
+                         "factory firmware %d with an empty update slot (nothing to read)"),
+    "fw_bridge": ("Z² Re:Connect Bridge (Zwischenschritt), aktueller Stand", "Z² Re:Connect Bridge (intermediate step), current"),
+    "fw_bridge_other": ("Z² Re:Connect Bridge (Zwischenschritt), anderer Stand", "Z² Re:Connect Bridge (intermediate step), other build"),
+    "fw_factory_junk": ("Werks-Firmware %d, im Update-Platz liegt ein unvollständiges Abbild (z. B. nach Stromausfall beim Aufspielen)",
+                        "factory firmware %d, the update slot holds an incomplete image (e.g. after a power loss while writing)"),
+    "verdict_bridge_junk": ("\nErgebnis: Im Update-Platz liegt kein startbares Abbild (es ist gesichert). Der Zwischenschritt kann "
+                            "den Platz neu beschreiben (Tester-Funktion, Menüpunkt 3).",
+                            "\nResult: the update slot holds no bootable image (it has been backed up). The intermediate step can "
+                            "write the slot again (tester function, menu item 3)."),
+    "junk_confirm": ("\nDer Update-Platz wird dabei gelöscht und neu beschrieben (das unvollständige Abbild ist gesichert).\n"
+                     "Zum Fortfahren bitte %s eintippen (alles andere bricht ab): ",
+                     "\nThe update slot will be erased and written again (the incomplete image has been backed up).\n"
+                     "Type %s to continue (anything else cancels): "),
+    "busy_other": ("Ein anderes Programm schreibt gerade auf den Z2 (z. B. NIs Device Updater). Bitte warten, bis es fertig "
+                   "ist, es schließen und den Installer dann neu starten. Es wurde nichts gesendet.",
+                   "Another program is writing to the Z2 right now (e.g. NI's Device Updater). Please wait until it is "
+                   "done, close it and then start the installer again. Nothing was sent."),
+    "kind_changed": ("Der Z2 hat sich seit der Prüfung verändert (anderes Gerät oder andere Firmware). Bitte erneut prüfen. "
+                     "Es wurde nichts geschrieben.",
+                     "The Z2 has changed since the check (other unit or other firmware). Please check again. Nothing was written."),
+    "bridge_other_advice": ("\nAuf dem Z2 läuft ein anderer Stand der Bridge. Bitte den Z2 bis zu viermal aus- und einschalten, bis "
+                            "der Installer wieder die Werks-Firmware meldet (die Bridge löscht sich dabei selbst), und dann den "
+                            "Zwischenschritt neu starten.",
+                            "\nAnother build of the bridge runs on the Z2. Please switch the Z2 off and on up to four times until "
+                            "the installer reports the factory firmware again (the bridge deletes itself), then start the "
+                            "intermediate step again."),
+    "bridge_noreturn": ("\nDie Bridge wurde geschrieben, aber der Z2 hat sich nach dem Neustart nicht rechtzeitig gemeldet "
+                        "(Windows richtet das neue Gerät beim ersten Mal manchmal langsam ein). Bitte den Installer neu starten "
+                        "und prüfen lassen - NICHT aus- und einschalten, solange das nicht geklärt ist.",
+                        "\nThe bridge was written, but the Z2 did not come back in time after the restart (Windows sometimes "
+                        "sets up the new device slowly the first time). Please start the installer again and let it check - "
+                        "do NOT switch the Z2 off and on until that is clear."),
+    "c_bridge_file": ("Bridge-Datei vorhanden, Prüfsumme stimmt", "Bridge file present, checksum matches"),
+    "c_empty_twice": ("Update-Platz zweimal leer gelesen", "Update slot read empty twice"),
+    "c_factory_ver": ("Werks-Firmware-Version ist für den Zwischenschritt freigegeben", "Factory firmware version is approved for the intermediate step"),
+    "verdict_bridge": ("\nErgebnis: Dieser Z2 hat keine Firmware 42 im Speicher. Mit dem ZWISCHENSCHRITT (Tester-Funktion) "
+                       "geht es trotzdem: Der Installer spielt eine kleine Bridge-Firmware auf, danach installiert NIs "
+                       "Device Updater die Firmware 42, und dann läuft der normale Weg (Menüpunkt 3 startet den Zwischenschritt).",
+                       "\nResult: this Z2 has no firmware 42 in memory. The INTERMEDIATE STEP (tester function) still works: "
+                       "the installer writes a small bridge firmware, then NI's Device Updater installs firmware 42, and then "
+                       "the normal path follows (menu item 3 starts the intermediate step)."),
+    "verdict_bridge_nofile": ("\nErgebnis: Dieser Z2 hat keine Firmware 42 im Speicher. Dafür gibt es den Zwischenschritt nur in der "
+                              "Tester-Version des Installers (Datei %s fehlt oder stimmt nicht). Es wird nichts geschrieben." % BRIDGE_FILE,
+                              "\nResult: this Z2 has no firmware 42 in memory. The intermediate step for that exists only in the "
+                              "tester version of the installer (file %s missing or wrong). Nothing is written." % BRIDGE_FILE),
+    "bridge_running": ("\nAuf dem Z2 läuft die Bridge (Zwischenschritt). Probestart: %s, %d von %d Starts gezählt.",
+                       "\nThe bridge (intermediate step) runs on the Z2. Trial start: %s, %d of %d starts counted."),
+    "bridge_state": (("aus", "aktiv", "bestätigt", "inaktiv (fremde Seite)", "inaktiv (Prüfproblem)", "gelöscht",
+                      "Grenze erreicht", "veraltet - bitte Z2 neu starten"),
+                     ("off", "active", "confirmed", "inactive (foreign page)", "inactive (check problem)", "erased",
+                      "limit reached", "stale - please restart the Z2")),
+    "bridge_warn": ("\nZWISCHENSCHRITT (TESTER-FUNKTION) - bitte lesen:\n"
+                    "  - Es wird eine kleine Bridge-Firmware in den LEEREN Update-Platz geschrieben. Die Werks-Firmware bleibt unberührt.\n"
+                    "  - Danach: Z2 NICHT aus- und einschalten, sondern NIs Device Updater starten (getestet: 1.2.0).\n"
+                    "    Er zeigt 'Installed 1 / Newest 42' und spielt Firmware 42 auf. Dann diesen Installer erneut starten.\n"
+                    "  - Rückweg, falls etwas nicht klappt: den Z2 dreimal aus- und einschalten (die Bridge löscht sich dann\n"
+                    "    selbst, die Werks-Firmware startet wieder) oder SHIFT + SETTINGS beim Einschalten 5 s halten.\n"
+                    "  - Restrisiko: Hat dein Z2 einen anderen Flash-Chip als die erprobten Geräte, kann er auf der Bridge\n"
+                    "    hängen bleiben; dann hilft nur ein SPI-Programmer. Teste nur, wenn du das in Kauf nimmst.\n",
+                    "\nINTERMEDIATE STEP (TESTER FUNCTION) - please read:\n"
+                    "  - A small bridge firmware is written into the EMPTY update slot. The factory firmware stays untouched.\n"
+                    "  - Afterwards: do NOT switch the Z2 off and on; start NI's Device Updater instead (tested: 1.2.0).\n"
+                    "    It shows 'Installed 1 / Newest 42' and installs firmware 42. Then start this installer again.\n"
+                    "  - Way back if something fails: switch the Z2 off and on three times (the bridge then deletes itself,\n"
+                    "    the factory firmware starts again) or hold SHIFT + SETTINGS for 5 s while switching on.\n"
+                    "  - Remaining risk: if your Z2 has a different flash chip than the tested units, it can hang on the\n"
+                    "    bridge; then only an SPI programmer helps. Only test if you accept that.\n"),
+    "bridge_untested": ("\nACHTUNG: Werks-Firmware %d ist für den Zwischenschritt NOCH NICHT an einem Gerät erprobt.\n"
+                        "Du wärst einer der ersten Tester. Bitte schicke danach die Datei '%s' aus dem Backup-Ordner.\n"
+                        "Zum Fortfahren bitte %s eintippen (alles andere bricht ab): ",
+                        "\nWARNING: factory firmware %d has NOT been tested with the intermediate step on any unit yet.\n"
+                        "You would be one of the first testers. Please send the file '%s' from the backup folder afterwards.\n"
+                        "Type %s to continue (anything else cancels): "),
+    "tester_word": ("TESTEN", "TEST"),
+    "bridge_written": ("\nBridge geschrieben und geprüft. Probestart aktiv (Start %d von %d).",
+                       "\nBridge written and verified. Trial start active (start %d of %d)."),
+    "bridge_handoff": ("\nJETZT:\n  1. Den Z2 NICHT aus- und einschalten. Diesen Installer schließen.\n"
+                       "  2. Erst jetzt NIs Device Updater starten (getestet: Version 1.2.0, enthält Firmware 42 für den Z2).\n"
+                       "     Er zeigt 'Installed Firmware 1 / Newest Firmware 42'. Auf Update klicken und warten.\n"
+                       "     Wirkt er danach still, ist er meist trotzdem fertig: dann einfach schließen.\n"
+                       "  3. Den Updater schließen und diesen Installer erneut starten: Er erkennt die Firmware 42 und\n"
+                       "     installiert %s.\n" % FW_NAME,
+                       "\nNOW:\n  1. Do NOT switch the Z2 off and on. Close this installer.\n"
+                       "  2. Only now start NI's Device Updater (tested: version 1.2.0, contains firmware 42 for the Z2).\n"
+                       "     It shows 'Installed Firmware 1 / Newest Firmware 42'. Click update and wait.\n"
+                       "     If it looks idle afterwards it is usually done anyway: just close it.\n"
+                       "  3. Close the updater and start this installer again: it detects firmware 42 and\n"
+                       "     installs %s.\n" % FW_NAME),
+    "bridge_warn_gui": ("Zwischenschritt (Tester-Funktion): Es wird eine kleine Bridge-Firmware in den Update-Platz geschrieben, "
+                        "die Werks-Firmware bleibt unberührt. Danach den Z2 nicht aus- und einschalten, sondern NIs Device Updater "
+                        "starten (getestet: 1.2.0), der dann Firmware 42 aufspielt. Rückweg, falls etwas nicht klappt: den Z2 bis zu "
+                        "viermal aus- und einschalten oder SHIFT + SETTINGS beim Einschalten 5 s halten. Restrisiko: Bei einem "
+                        "unbekannten Flash-Chip kann der Z2 auf der Bridge hängen bleiben, dann hilft nur ein SPI-Programmer.\n\n"
+                        "Bridge jetzt schreiben?",
+                        "Intermediate step (tester function): a small bridge firmware is written into the update slot, the factory "
+                        "firmware stays untouched. Afterwards do not switch the Z2 off and on but start NI's Device Updater "
+                        "(tested: 1.2.0), which then installs firmware 42. Way back if something fails: switch the Z2 off and on up "
+                        "to four times or hold SHIFT + SETTINGS for 5 s while switching on. Remaining risk: with an unknown flash "
+                        "chip the Z2 can hang on the bridge; then only an SPI programmer helps.\n\nWrite the bridge now?"),
+    "bridge_fallback": ("\nDer Zwischenschritt hat nicht geklappt. Rückweg: den Z2 bis zu viermal aus- und einschalten, bis der "
+                        "Installer wieder die Werks-Firmware meldet (die Bridge löscht sich dann selbst), oder SHIFT + SETTINGS beim "
+                        "Einschalten 5 s halten. Danach läuft wieder die Werks-Firmware. "
+                        "Bitte die Datei '%s' aus dem Backup-Ordner an den Entwickler schicken." % BRIDGE_LOG,
+                        "\nThe intermediate step did not work. Way back: switch the Z2 off and on up to four times until the "
+                        "installer reports the factory firmware again (the bridge then deletes itself), or hold SHIFT + SETTINGS "
+                        "for 5 s while switching on. The factory firmware then runs again. "
+                        "Please send the file '%s' from the backup folder to the developer." % BRIDGE_LOG),
+    "bridge_refresh_ask": ("\nDie Bridge ist ein älterer Stand oder hat schon %d von %d Starts verbraucht. Neu aufspielen (setzt den "
+                           "Zähler zurück)? %s eintippen, sonst Abbruch: ",
+                           "\nThe bridge is an older build or has already used %d of %d starts. Write it again (resets the "
+                           "counter)? Type %s, anything else cancels: "),
     "need_usb": ("Für macOS/Linux fehlt das Python-Paket 'pyusb' bzw. 'libusb-package' (pip install pyusb libusb-package).",
                  "On macOS/Linux the Python packages 'pyusb' and 'libusb-package' are required (pip install pyusb libusb-package)."),
 }
@@ -154,7 +284,33 @@ DISCLAIMER = """
   If you do not know what you need this firmware for, do NOT install it.
 ==============================================================================
 """
+DISCLAIMER_DE = """
+==============================================================================
+  BITTE VOR DEM AUFSPIELEN LESEN
+==============================================================================
+  Z² Re:Connect ist ein privates, nicht kommerzielles Hobbyprojekt. Sein
+  einziger Zweck ist, alte, aber gute Hardware - den Traktor Kontrol Z2 - mit
+  heutigen Geräten wie dem iPad weiter nutzen zu können.
+
+  - Es steht in keiner Verbindung zu Native Instruments und wird von Native
+    Instruments weder unterstützt noch empfohlen.
+  - Es gibt keinen kommerziellen Hintergrund. Es wird nichts verkauft und
+    nichts als Produkt oder Dienstleistung angeboten.
+  - Es gibt KEINE GEWÄHRLEISTUNG irgendeiner Art. Du benutzt diese Software
+    und Firmware vollständig auf eigene Gefahr. Niemand übernimmt eine Haftung
+    für Schäden am Gerät, Datenverlust oder andere Folgen.
+  - Das Aufspielen einer veränderten Firmware kann in seltenen Fällen ein
+    Gerät unbrauchbar machen.
+
+  Wenn du nicht weißt, wofür du diese Firmware brauchst, installiere sie NICHT.
+==============================================================================
+"""
 DISCLAIMER_WORD = "I UNDERSTAND"
+
+
+def disclaimer_text():
+    """Der Hinweis in der gewaehlten Sprache (LANG 0 = Deutsch)."""
+    return DISCLAIMER_DE if LANG == 0 else DISCLAIMER
 
 
 def t(key, *a):
@@ -322,6 +478,7 @@ class WinBackend:
     def get_state(self): return self._io(self.I_GETSTATE, outlen=1)[0]
     def get_status(self): return self._io(self.I_GETSTATUS, outlen=6)
     def clr_status(self): self._io(self.I_CLRSTATUS)
+    def abort(self): self._io(0x8086241C)
     def upload(self, block): return self._io(self.I_UPLOAD, struct.pack("<H", block), XFER)
     def dnload(self, block, data): self._io(self.I_DNLOAD, struct.pack("<HH", block, len(data)) + data + bytes(512 - len(data)))
     def reset(self):
@@ -374,8 +531,13 @@ class UsbBackend:
             except Exception: pass
         self.dev = None
 
+    # The first DNLOAD block erases the whole upgrade slot before its status stage (old image 64 KiB
+    # + slot 128 KiB = 48 x 4 KiB erases: about 2.4 s typical, up to about 10 s on a slow chip;
+    # measured 25.11.2026 on the bridge). 5 s was too tight, so OUT requests get 30 s.
+    OUT_TIMEOUT_MS = 30000
+
     def _out(self, req, value, data=b""):
-        try: self.dev.ctrl_transfer(0x21, req, value, self.intf, data, 5000)
+        try: self.dev.ctrl_transfer(0x21, req, value, self.intf, data, self.OUT_TIMEOUT_MS)
         except self.usb.core.USBError as e: raise OSError(str(e))
 
     def _in(self, req, value, n):
@@ -385,6 +547,7 @@ class UsbBackend:
     def get_state(self): return self._in(5, 0, 1)[0]
     def get_status(self): return self._in(3, 0, 6)
     def clr_status(self): self._out(4, 0)
+    def abort(self): self._out(6, 0)
     def upload(self, block): return self._in(2, block, XFER)
     def dnload(self, block, data): self._out(1, block, data)
     def reset(self):
@@ -441,8 +604,12 @@ class Installer:
             except OSError as e: st = STATE_ERROR; self._note("get_state: %s" % e)
             self._note("state %s" % st)
             if st in (0, STATE_IDLE): return
-            try: self.b.clr_status()
-            except OSError: pass
+            if st in (3, 4, 5, 6, 7):                 # a download/manifestation of ANOTHER program is running
+                raise Z2Error(t("busy_other"))
+            try:
+                if st == 9: self.b.abort()            # dfuUPLOAD-IDLE -> ABORT (like z2_bridge_trial.idle)
+                else: self.b.clr_status()             # dfuERROR (or unknown) -> CLRSTATUS
+            except (OSError, AttributeError): pass
             self.sleep(0.5)
 
     def _read_once(self):
@@ -457,8 +624,10 @@ class Installer:
         self._idle()
         return bytes(data)
 
-    def read_firmware(self, passes=2):
-        """Liest die Firmware; direkt nach dem Start liefert der Z2 manchmal 0 Bytes, dann nochmal versuchen."""
+    def read_firmware(self, passes=2, allow_empty=False):
+        """Liest die Firmware; direkt nach dem Start liefert der Z2 manchmal 0 Bytes, dann nochmal versuchen.
+        allow_empty: bei einer fuer den Zwischenschritt freigegebenen Werks-Version ist "leer" ein gueltiges
+        Ergebnis - aber nur, wenn ALLE Durchgaenge mit allen Wiederholungen leer sind (sonst Fehler)."""
         got = []
         for n in range(passes):
             say("reading", n + 1)
@@ -473,9 +642,14 @@ class Installer:
                 if data: break
                 self.sleep(3)
             if not data:
-                try: self._note("status %s" % self.b.get_status().hex())
-                except OSError as e: self._note("get_status: %s" % e)
+                try:
+                    st = self.b.get_status()
+                    self._note("status %s" % st.hex())
+                except OSError as e:
+                    st = None; self._note("get_status: %s" % e)
                 self._write_diag()
+                if allow_empty and st is not None and st[0] == 0:
+                    got.append(b""); continue
                 bcd = getattr(self, "bcd", 42)
                 raise Z2Error(t("read_empty") if bcd == 42 else t("read_empty_ver", bcd))
             got.append(data)
@@ -502,9 +676,16 @@ class Installer:
         Die gelesene Firmware wird IMMER sofort als Backup gespeichert (Pflicht, nicht abschaltbar).
         Klappt das nicht, bricht die Pruefung mit Fehler ab, und es kann nichts installiert werden."""
         self.connect()
-        img = self.read_firmware()
+        if self.bcd == BRIDGE_BCD:
+            return self._check_bridge()
+        eligible = self.bridge_image() is not None and (self.bcd in FACTORY_BCD_OK or self.bcd in FACTORY_BCD_TESTER)
+        img = self.read_firmware(allow_empty=eligible)
+        if not img:
+            return self._check_factory_empty()
         self.save_backup(img)
         kind = self.classify(img)
+        if eligible and kind == "unknown":
+            return self._check_factory_junk(img)
         new = self.build(img) if kind in ("source", "older") else None
         say("fw_is", t(KIND_TEXT[kind]),
             len(img), hashlib.sha256(img).hexdigest())
@@ -548,6 +729,7 @@ class Installer:
             st = self.b.get_status()
             if st[0] != 0: raise Z2Error("DFU status %d, state %d" % (st[0], st[4]))
             if st[4] in want: return st[4]
+            if st[4] == STATE_ERROR: raise Z2Error("DFU error state (status 0)")   # never wanted: stop at once
             if time.time() - t0 > timeout: raise Z2Error("timeout, state %d" % st[4])
             self.sleep(max(st[1] | st[2] << 8 | st[3] << 16, 1) / 1000.0)
 
@@ -559,7 +741,16 @@ class Installer:
         n = len(img) // XFER
         for blk in range(n):
             self.b.dnload(blk, img[blk * XFER:(blk + 1) * XFER])
-            self._wait((STATE_DNLOAD_IDLE,), 20)
+            if blk == 0 and getattr(self, "quirk_retry", False):
+                # NIs Werks-/42-Firmware: DNLOAD aus appIDLE -> dfuERROR (Status 0), es wurde NICHTS geschrieben.
+                # Genau einmal: CLRSTATUS (-> dfuIDLE) und Block 0 noch einmal. Jeder weitere Fehler bricht ab.
+                st = self.b.get_status()
+                if st[0] == 0 and st[4] == STATE_ERROR:
+                    self._note("dnload block 0: dfuERROR/status 0 (NI quirk) -> CLRSTATUS, retry once")
+                    self.b.clr_status()
+                    if self.b.get_state() != STATE_IDLE: raise Z2Error("DFU not idle after CLRSTATUS")
+                    self.b.dnload(0, img[:XFER])
+            self._wait((STATE_DNLOAD_IDLE,), 30)
             if blk % 16 == 0 or blk == n - 1:
                 if self.on_progress: self.on_progress((blk + 1) * 100 // n)
                 else: sys.stdout.write(t("progress", (blk + 1) * 100 // n)); sys.stdout.flush()
@@ -570,12 +761,12 @@ class Installer:
             try: self.b.clr_status()
             except OSError: pass
 
-    def restart(self):
+    def restart(self, wait=30):
         say("restart")
         self.b.reset(); self.b.close()
         self.sleep(4)
         say("wait")
-        for _ in range(30):
+        for _ in range(wait):
             try:
                 if self.b.count() == 1:
                     self.sleep(2); self.b.open(); return True
@@ -591,17 +782,26 @@ class Installer:
         back = self.read_firmware(passes=1)
         return back == img
 
+    def _ask(self, prompt, key):
+        """key: disclaimer | confirm | tester | junk | refresh. The GUI answers by key (ask.keyed = True)."""
+        f = self.ask
+        return f(prompt, key) if getattr(f, "keyed", False) else f(prompt)
+
     def accept_disclaimer(self):
-        print(DISCLAIMER)
-        a = self.ask("Type %s to continue (anything else cancels): " % DISCLAIMER_WORD)
+        print(disclaimer_text())
+        a = self._ask(t("disclaimer_ask", DISCLAIMER_WORD), "disclaimer")
         return " ".join(a.strip().upper().split()) == DISCLAIMER_WORD
 
     def confirm(self):
         print(t("warn"))
-        return self.ask(t("confirm", t("yes_word"))).strip().upper() == t("yes_word")
+        return self._ask(t("confirm", t("yes_word")), "confirm").strip().upper() == t("yes_word")
 
-    def install(self):
+    def install(self, expect_kind=None):
         kind, img, new = self.check()
+        if expect_kind is not None and kind != expect_kind:
+            say("kind_changed"); return False
+        if kind in ("factory_empty", "factory_junk"): return self.install_bridge(new, junk=kind == "factory_junk")
+        if kind in ("bridge", "bridge_other"): return self.bridge_followup(kind, new)
         if kind == "target": return True
         if new is None: return False
         backup_path = self.last_backup                  # von check() gespeichert
@@ -631,6 +831,174 @@ class Installer:
             say("err", e)
         say("restore_bad", backup_path)
         return False
+
+    # --- Zwischenschritt "Bridge" (Tester-Funktion)
+    def bridge_image(self):
+        """Die Bridge-Datei neben dem Programm, nur wenn ihre Pruefsumme genau stimmt (sonst None).
+        Nur unter Windows (NIs Treiber): der Weg mit libusb (macOS/Linux) ist noch nicht am Geraet erprobt."""
+        if not hasattr(self, "_bridge"):
+            self._bridge = None
+            p = find_file(BRIDGE_FILE) if sys.platform == "win32" else None
+            if p:
+                d = open(p, "rb").read()
+                if hashlib.sha256(d).hexdigest() == BRIDGE_SHA256 and image_problems(d) is None and len(d) % 256 == 0:
+                    self._bridge = d
+        return self._bridge
+
+    def _log(self, msg):
+        """Protokoll des Zwischenschritts (ohne Seriennummer, ohne Firmware-Bytes) im Backup-Ordner."""
+        self._note(msg)
+        try:
+            os.makedirs(self.backup_dir, exist_ok=True)
+            with open(os.path.join(self.backup_dir, BRIDGE_LOG), "a", encoding="utf-8") as f:
+                f.write("%s  %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S"), msg))
+        except OSError:
+            pass
+
+    def bridge_query(self):
+        """Probestart-Bericht der Bridge (UPLOAD-Block TRIAL_QUERY, aendert nichts). None = keine Bridge."""
+        self._idle()
+        try:
+            r = self.b.upload(TRIAL_QUERY)
+        except OSError as e:
+            self._note("bridge query: %s" % e); return None
+        if len(r) != 16 or r[:4] != b"Z2PB":
+            try: self.b.abort()
+            except (OSError, AttributeError): pass
+            return None
+        return {"state": r[4], "starts": r[5], "max": r[6], "result": r[7]}
+
+    def _check_factory_empty(self):
+        ver = FACTORY_BCD_OK.get(self.bcd) or FACTORY_BCD_TESTER.get(self.bcd)
+        say("fw_is", t("fw_factory_empty", ver), 0, "-")
+        self._log("check: factory firmware %d (bcdDevice 0x%04x), update slot empty, %s" % (
+            ver, self.bcd, "tested version" if self.bcd in FACTORY_BCD_OK else "UNTESTED version (tester confirmation needed)"))
+        bimg = self.bridge_image()
+        results = [("c_dev", True), ("c_empty_twice", True), ("c_factory_ver", True), ("c_bridge_file", bimg is not None)]
+        for key, good in results: print(t("ok" if good else "bad") + t(key))
+        if bimg is None:
+            say("verdict_bridge_nofile"); return "unknown", b"", None
+        say("verdict_bridge")
+        return "factory_empty", b"", bimg
+
+    def _check_factory_junk(self, img):
+        ver = FACTORY_BCD_OK.get(self.bcd) or FACTORY_BCD_TESTER.get(self.bcd)
+        say("fw_is", t("fw_factory_junk", ver), len(img), hashlib.sha256(img).hexdigest())
+        self._log("check: factory firmware %d (bcdDevice 0x%04x), slot holds an unknown/incomplete image (%d bytes, sha %s), "
+                  "backed up" % (ver, self.bcd, len(img), hashlib.sha256(img).hexdigest()[:16]))
+        for key, good in (("c_dev", True), ("c_read", True), ("c_backup", True), ("c_factory_ver", True), ("c_bridge_file", True)):
+            print(t("ok" if good else "bad") + t(key))
+        say("verdict_bridge_junk")
+        return "factory_junk", img, self.bridge_image()
+
+    def _check_bridge(self):
+        q = self.bridge_query()
+        if q is None:
+            say("fw_is", t("fw_unknown"), 0, "-"); say("verdict_no"); return "unknown", b"", None
+        self.bridge_trial = q
+        states = t("bridge_state")
+        st = states[q["state"]] if q["state"] < len(states) else str(q["state"])
+        # header block first; read the whole image only if it is exactly the current build
+        self._idle()
+        head = self.b.upload(0)
+        try: self.b.abort()
+        except (OSError, AttributeError): pass
+        cur = self.bridge_image()
+        if hashlib.sha256(head).hexdigest() == BRIDGE_HEAD_SHA256:      # current build: safe to read completely
+            img = self.read_firmware(passes=1)
+            sha = hashlib.sha256(img).hexdigest()
+            kind = "bridge" if sha == BRIDGE_SHA256 else "bridge_other"
+        else:
+            img, sha, kind = b"", "-", "bridge_other"
+        say("fw_is", t("fw_" + kind), len(img), sha)
+        say("bridge_running", st, q["starts"], q["max"])
+        self._log("check: bridge running (%s), trial state %d starts %d/%d" % (kind, q["state"], q["starts"], q["max"]))
+        if kind == "bridge_other": self._bsay("bridge_other_advice")
+        return kind, img, cur
+
+    def _bsay(self, key):
+        self.bridge_msg = key
+        say(key)
+
+    def _confirm_word(self, prompt, word, key):
+        return " ".join(self._ask(prompt, key).strip().upper().split()) == word
+
+    def install_bridge(self, bimg, junk=False):
+        """Schreibt die Bridge in den Update-Platz (leer oder unvollstaendig), prueft sie, erklaert den naechsten Schritt."""
+        self.bridge_write_started, self.bridge_result = False, None
+        if bimg is None or hashlib.sha256(bimg).hexdigest() != BRIDGE_SHA256:
+            raise Z2Error("bridge file missing or wrong - nothing written")
+        if not self.accept_disclaimer():
+            say("cancel"); return False
+        print(t("bridge_warn"))
+        if self.bcd not in FACTORY_BCD_OK:
+            ver = FACTORY_BCD_TESTER.get(self.bcd)
+            if ver is None or not self._confirm_word(t("bridge_untested", ver, BRIDGE_LOG, t("tester_word")),
+                                                     t("tester_word"), "tester"):
+                say("cancel"); self._log("cancelled at the untested-version confirmation"); return False
+        if junk and not self._confirm_word(t("junk_confirm", t("tester_word")), t("tester_word"), "junk"):
+            say("cancel"); self._log("cancelled at the incomplete-slot confirmation"); return False
+        if not self.confirm():
+            say("cancel"); return False
+        self._log("write bridge %s (%d bytes) via factory DFU%s" % (BRIDGE_SHA256[:16], len(bimg), " over an incomplete slot" if junk else ""))
+        self.bridge_write_started = True
+        try:
+            self.quirk_retry = True
+            try: self.write(bimg)
+            finally: self.quirk_retry = False
+            self._log("write done")
+        except (OSError, Z2Error) as e:
+            say("err", e); self._log("write FAILED: %s" % e); self._bsay("bridge_fallback"); return False
+        if not self.restart(wait=90):
+            self._log("written, but the Z2 did not come back within 90 s"); self._bsay("bridge_noreturn"); return False
+        try:
+            info = self.connect()
+            self._log("after restart: bcdDevice 0x%04x" % info["bcd"])
+            if info["bcd"] != BRIDGE_BCD: raise Z2Error("device did not come back as the bridge (bcd 0x%04x)" % info["bcd"])
+            q = self.bridge_query()
+            self._log("trial report: %s" % q)
+            if q is None or q["state"] != 1: raise Z2Error("bridge trial counter not active: %s" % q)
+            say("verify")
+            back = self.read_firmware(passes=1)
+            self._log("readback sha %s" % hashlib.sha256(back).hexdigest()[:16])
+            if back != bimg: raise Z2Error(t("verify_bad"))
+        except (OSError, Z2Error) as e:
+            say("err", e); self._log("FAILED: %s" % e); self._bsay("bridge_fallback"); return False
+        self.bridge_result = q
+        say("bridge_written", q["starts"], q["max"])
+        self._bsay("bridge_handoff")
+        self._log("bridge installed and verified, hand-off to NI Device Updater")
+        return True
+
+    def bridge_followup(self, kind, bimg):
+        """Die Bridge laeuft schon: Uebergabe-Text; viele Starts verbraucht -> neu aufspielen anbieten."""
+        self.bridge_write_started, self.bridge_result = False, None
+        q = getattr(self, "bridge_trial", None) or {"starts": 0, "max": 3, "state": 0}
+        if kind == "bridge_other":
+            return False                                  # bridge_other_advice was shown by the check
+        if q["starts"] < 2:
+            self._bsay("bridge_handoff"); self.bridge_result = q; return True
+        if bimg is None:
+            say("verdict_bridge_nofile"); return False
+        if not self._confirm_word(t("bridge_refresh_ask", q["starts"], q["max"], t("yes_word")), t("yes_word"), "refresh"):
+            self._bsay("bridge_handoff"); self.bridge_result = q; return True
+        self._log("refresh bridge (starts %d/%d)" % (q["starts"], q["max"]))
+        self.bridge_write_started = True
+        try:
+            self.write(bimg)
+            if not self.restart(wait=90):
+                self._log("refresh written, no return"); self._bsay("bridge_noreturn"); return False
+            info = self.connect()
+            q2 = self.bridge_query()
+            back = self.read_firmware(passes=1)
+            if info["bcd"] != BRIDGE_BCD or q2 is None or q2["state"] != 1 or back != bimg:
+                raise Z2Error(t("verify_bad"))
+        except (OSError, Z2Error) as e:
+            say("err", e); self._log("refresh FAILED: %s" % e); self._bsay("bridge_fallback"); return False
+        self._log("refresh done, trial %s" % q2)
+        self.bridge_result = q2
+        say("bridge_written", q2["starts"], q2["max"]); self._bsay("bridge_handoff")
+        return True
 
     def restore(self, path=None):
         if path is None:
@@ -665,7 +1033,8 @@ class Installer:
         return False
 
 
-KIND_TEXT = {"source": "fw_source", "target": "fw_target", "older": "fw_older", "unknown": "fw_unknown"}
+KIND_TEXT = {"source": "fw_source", "target": "fw_target", "older": "fw_older", "unknown": "fw_unknown",
+             "bridge": "fw_bridge", "bridge_other": "fw_bridge_other"}
 
 
 def default_backup_dir():
@@ -713,7 +1082,7 @@ def main(argv=None, backend=None, ask=input):
                     say("err", e)
                 finally:
                     inst.b.close()
-        elif cmd == "check": ok = inst.check()[0] in ("source", "older", "target")
+        elif cmd == "check": ok = inst.check()[0] in ("source", "older", "target", "factory_empty", "factory_junk", "bridge")
         elif cmd == "backup": ok = bool(inst.backup())
         elif cmd == "install": ok = inst.install()
         elif cmd == "restore": ok = inst.restore(argv[1] if len(argv) > 1 else None)

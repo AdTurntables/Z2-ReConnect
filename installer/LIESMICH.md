@@ -54,7 +54,7 @@ Backups liegen in `Dokumente/Z2-Firmware-Backup`.
 ## Textmenü (`--cli`)
 1. **Prüfen** – Sicherheitsmodus. Liest die Firmware aus dem Z2 und sagt, ob dieses Gerät geeignet ist. Es wird nichts geschrieben.
 2. **Backup** – sichert die aktuelle Firmware nach `Dokumente/Z2-Firmware-Backup`.
-3. **Installieren** – Prüfung, Hinweis (englisch, mit „I UNDERSTAND“ bestätigen), Backup, Rückfrage, Schreiben, Neustart, Kontrolle. Bei einer älteren Z2-Re:Connect-Version: Update.
+3. **Installieren** – Prüfung, Hinweis (mit „I UNDERSTAND“ bestätigen), Backup, Rückfrage, Schreiben, Neustart, Kontrolle. Bei einer älteren Z2-Re:Connect-Version: Update.
 4. **Backup zurückschreiben** – stellt eine gesicherte Firmware wieder her, zum Beispiel die Original-Firmware 42.
 
 ## Was die Sicherheitsprüfung tut
@@ -72,6 +72,34 @@ das Programm ab.
 Grenze der Prüfung: Sie vergleicht die Firmware, nicht die Elektronik. Sollte es Z2 mit gleicher Firmware 42, aber anderer
 Hardware geben, erkennt die Prüfung das nicht.
 
+## Zwischenschritt für Z2 ohne Firmware 42 (Tester-Version, nur Windows)
+Nur aktiv, wenn die Datei `z2rc_bridge.z2bridge` (Bridge-Firmware, eigener Code) neben dem Programm
+liegt. Sie ist nur im Paket `Z2-ReConnect-0.9.0-beta2-Tester-Windows.zip` enthalten. Ohne diese Datei verhält sich der
+Installer genau wie bisher.
+
+1. **Prüfen:** Werks-Firmware mit leerem Update-Platz wird erkannt.
+   - Version 30: erprobt.
+   - Version 51: noch nicht erprobt, braucht das Wort „TESTEN“.
+   - Andere Versionen: abgelehnt.
+2. **Installieren:** Hinweis, Warnung zum Zwischenschritt und Rückfrage. Dann schreibt der Installer die Bridge und
+   startet neu. Er prüft, ob sich die Bridge meldet, ob ihr Probestart-Zähler läuft und ob das Zurücklesen
+   byte-gleich ist.
+3. **Danach:** den Z2 nicht aus- und einschalten, den Installer schließen und NIs Device Updater (getestet: 1.2.0)
+   starten. Er zeigt „Installed 1 / Newest 42“ und spielt Firmware 42 auf.
+4. **Updater schließen, Installer erneut starten:** Er findet die 42 und installiert Z2-Re:Connect wie gewohnt.
+
+**Rückweg:** den Z2 bis zu viermal aus- und einschalten, bis wieder die Werks-Firmware gemeldet wird (die Bridge
+löscht sich dabei selbst), oder SHIFT + SETTINGS beim Einschalten 5 s halten.
+
+**Was der Installer sonst noch macht:**
+- **Unvollständiger Update-Platz** (zum Beispiel nach Stromausfall beim Aufspielen): Er sichert den Inhalt und schreibt
+  die Bridge nach dem Wort „TESTEN“ neu.
+- **Läuft die Bridge schon,** erklärt er den nächsten Schritt. Sind viele Starts verbraucht, bietet er an, sie neu
+  aufzuspielen.
+- **Schreibt gerade ein anderes Programm auf den Z2** (zum Beispiel der Updater), sendet er nichts.
+- **Protokoll** jedes Schritts: `Z2-ReConnect-Bridge-Protokoll.txt` im Backup-Ordner, ohne Seriennummer und ohne
+  Firmware.
+
 ## Wenn etwas schiefgeht
 - Nach dem Schreiben liest das Programm zurück. Weicht das Ergebnis ab, schreibt es automatisch das Backup zurück.
 - Bricht das Schreiben ab (Strom, Kabel), startet der Z2 mit seiner Werks-Firmware und bleibt per USB erreichbar.
@@ -88,6 +116,10 @@ Backups (`*.z2backup`) enthalten die Original-Firmware und dürfen **nicht** wei
 - `make_patch.py` erzeugt eine Patch-Datei aus Ausgangs-Abbild und neuem Abbild. Alle Patch-Dateien im Ordner müssen dasselbe
   Ziel-Abbild bauen.
 - `python test_installer.py <nifw42_dump> <neues_abbild> [<z2reconnect_3b>]` prüft den Ablauf ohne Gerät.
+- `python test_bridge_path.py <bridge.bin> <nifw42_dump> <neues_abbild>` prüft den Zwischenschritt gegen ein simuliertes
+  Gerät (Werks-Firmware, Bridge, NI-Updater, FW 42).
+- `python make_tester_release.py` packt das Tester-Paket (feste Dateiliste: EXE, Bridge, `LIESMICH-TESTER.txt`,
+  `THIRD_PARTY_NOTICES.txt`).
 - `z2_gui.py` ist die Oberfläche (tkinter); die Arbeit macht weiter die Klasse `Installer` in `z2_installer.py`.
 - `intro.frames` ist die Start-Animation: 160 PNG-Bilder (432 × 540, 20 Bilder/s) in einer Datei.
 - `build_windows.ps1`, `build_mac.sh`, `.github/workflows/build.yml` bauen die Programme samt `djay`-Ordner.
